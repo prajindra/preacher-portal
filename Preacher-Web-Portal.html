@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISKCON Malaysia Preaching Network</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script type="module" src="./firebase-config.js"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#FF9933',secondary:'#FFD700'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+font-family: 'Open Sans', sans-serif;
+scroll-behavior: smooth;
+}
+h1, h2, h3, h4, h5, h6 {
+font-family: 'Montserrat', sans-serif;
+}
+.stat-counter {
+transition: all 0.5s ease;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+.custom-switch {
+position: relative;
+display: inline-block;
+width: 50px;
+height: 24px;
+}
+.custom-switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.switch-slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #e5e7eb;
+transition: .4s;
+border-radius: 24px;
+}
+.switch-slider:before {
+position: absolute;
+content: "";
+height: 18px;
+width: 18px;
+left: 3px;
+bottom: 3px;
+background-color: white;
+transition: .4s;
+border-radius: 50%;
+}
+input:checked + .switch-slider {
+background-color: #FF9933;
+}
+input:checked + .switch-slider:before {
+transform: translateX(26px);
+}
+.custom-radio {
+position: relative;
+display: inline-block;
+width: 20px;
+height: 20px;
+}
+.custom-radio input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.radio-mark {
+position: absolute;
+top: 0;
+left: 0;
+height: 20px;
+width: 20px;
+background-color: #fff;
+border: 2px solid #e5e7eb;
+border-radius: 50%;
+}
+.custom-radio:hover .radio-mark {
+border-color: #d1d5db;
+}
+.custom-radio input:checked ~ .radio-mark {
+border-color: #FF9933;
+}
+.radio-mark:after {
+content: "";
+position: absolute;
+display: none;
+top: 3px;
+left: 3px;
+width: 10px;
+height: 10px;
+border-radius: 50%;
+background: #FF9933;
+}
+.custom-radio input:checked ~ .radio-mark:after {
+display: block;
+}
+.custom-checkbox {
+position: relative;
+display: inline-block;
+width: 20px;
+height: 20px;
+}
+.custom-checkbox input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+.checkbox-mark {
+position: absolute;
+top: 0;
+left: 0;
+height: 20px;
+width: 20px;
+background-color: #fff;
+border: 2px solid #e5e7eb;
+border-radius: 4px;
+}
+.custom-checkbox:hover .checkbox-mark {
+border-color: #d1d5db;
+}
+.custom-checkbox input:checked ~ .checkbox-mark {
+background-color: #FF9933;
+border-color: #FF9933;
+}
+.checkbox-mark:after {
+content: "";
+position: absolute;
+display: none;
+left: 6px;
+top: 2px;
+width: 5px;
+height: 10px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+.custom-checkbox input:checked ~ .checkbox-mark:after {
+display: block;
+}
+.custom-range {
+-webkit-appearance: none;
+width: 100%;
+height: 6px;
+border-radius: 3px;
+background: #e5e7eb;
+outline: none;
+}
+.custom-range::-webkit-slider-thumb {
+-webkit-appearance: none;
+appearance: none;
+width: 18px;
+height: 18px;
+border-radius: 50%;
+background: #FF9933;
+cursor: pointer;
+border: 2px solid white;
+box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.custom-range::-moz-range-thumb {
+width: 18px;
+height: 18px;
+border-radius: 50%;
+background: #FF9933;
+cursor: pointer;
+border: 2px solid white;
+box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.hero-section {
+background: linear-gradient(90deg, #FF9933 0%, #FFD700 100%);
+position: relative;
+overflow: hidden;
+}
+.hero-section::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-width='1' opacity='0.1'%3E%3Ccircle cx='300' cy='300' r='250'/%3E%3Ccircle cx='300' cy='300' r='200'/%3E%3Ccircle cx='300' cy='300' r='150'/%3E%3Ccircle cx='300' cy='300' r='100'/%3E%3Cpath d='M300 50v500M50 300h500M150 150l300 300M150 450l300-300'/%3E%3Cpath d='M300 100c110 0 200 90 200 200s-90 200-200 200-200-90-200-200 90-200 200-200z'/%3E%3C/g%3E%3C/svg%3E");
+background-repeat: repeat;
+background-size: 600px;
+pointer-events: none;
+}
+.hero-section::before,
+.hero-section::after {
+content: '';
+position: absolute;
+width: 400px;
+height: 400px;
+background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/><circle cx="50" cy="50" r="35" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/><circle cx="50" cy="50" r="25" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/></svg>');
+background-size: contain;
+background-repeat: no-repeat;
+opacity: 0.3;
+}
+.hero-section::before {
+left: -100px;
+top: -100px;
+}
+.hero-section::after {
+right: -100px;
+bottom: -100px;
+}
+</style>
+</head>
+<body class="bg-white">
+<!-- Navigation -->
+<nav class="bg-white shadow-md fixed w-full z-50">
+<div class="container mx-auto px-4">
+<div class="flex justify-between items-center h-20">
+<div class="flex items-center">
+<a href="#" class="flex items-center">
+<img src="https://static.readdy.ai/image/6d35e524e60a5d85af4995c2d7119a74/37e6fbb3fe70a3e3ab4660003eaf1b2a.webp" alt="ISKCON Logo" class="h-10 mr-3">
+<span class="text-3xl font-['Pacifico'] text-primary">Malaysia</span>
+</a>
+</div>
+<div class="hidden md:flex space-x-8">
+<a href="#" class="text-gray-800 hover:text-primary font-medium">Home</a>
+<a href="#dashboard" class="text-gray-800 hover:text-primary font-medium">Dashboard</a>
+<a href="#resources" class="text-gray-800 hover:text-primary font-medium">Resources</a>
+<a href="#about" class="text-gray-800 hover:text-primary font-medium">About</a>
+<a href="#contact" class="text-gray-800 hover:text-primary font-medium">Contact</a>
+</div>
+<div class="flex items-center">
+<button id="auth-button" class="bg-primary text-white px-6 py-2 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap">
+Login / Register
+</button>
+<script type="module">
+import { auth } from './firebase-config.js';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+
+document.getElementById('auth-button').addEventListener('click', async () => {
+  const email = prompt('Enter your email:');
+  const password = prompt('Enter your password:');
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    alert(`Welcome, ${userCredential.user.email}`);
+  } catch (error) {
+    if (error.code === 'auth/user-not-found') {
+      const createAccount = confirm('User not found. Would you like to create an account?');
+      if (createAccount) {
+        try {
+          const newUser = await createUserWithEmailAndPassword(auth, email, password);
+          alert(`Account created for ${newUser.user.email}`);
+        } catch (createError) {
+          alert(`Error creating account: ${createError.message}`);
+        }
+      }
+    } else {
+      alert(`Error: ${error.message}`);
+    }
+  }
+});
+</script>
+<div class="md:hidden ml-4 w-10 h-10 flex items-center justify-center">
+<i class="ri-menu-line ri-lg"></i>
+</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="relative min-h-screen flex items-center pt-20 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-r from-primary/95 to-secondary/95">
+<img src="https://static.readdy.ai/image/6d35e524e60a5d85af4995c2d7119a74/5c3415d88ed9407837dd17d724257621.jpeg" alt="Hero Background" class="w-full h-full object-cover object-center opacity-20">
+</div>
+<div class="container mx-auto px-4 py-16 relative">
+<div class="max-w-3xl">
+<h1 class="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">Empowering Preachers, <br/>Uplifting Souls</h1>
+<p class="text-xl text-white/90 mb-12 leading-relaxed">Join the ISKCON Malaysia Preaching Network and be part of a spiritual revolution that transforms lives through divine knowledge.</p>
+<div class="flex flex-col sm:flex-row gap-6">
+<button class="bg-white text-primary px-10 py-4 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap font-semibold text-lg group flex items-center justify-center">
+Join as a Preacher
+<i class="ri-arrow-right-line ml-2 group-hover:translate-x-1 transition-transform"></i>
+</button>
+<button class="bg-primary/10 backdrop-blur-sm text-white border-2 border-white/20 px-10 py-4 !rounded-button hover:bg-primary/20 transition whitespace-nowrap font-semibold text-lg flex items-center justify-center">
+Explore Reports
+<i class="ri-line-chart-line ml-2"></i>
+</button>
+</div>
+<div class="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+<i class="ri-heart-line text-white text-xl"></i>
+</div>
+<div class="text-left">
+<h3 class="text-white font-semibold">10K+</h3>
+<p class="text-white/70 text-sm">Lives Touched</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+<i class="ri-team-line text-white text-xl"></i>
+</div>
+<div class="text-left">
+<h3 class="text-white font-semibold">500+</h3>
+<p class="text-white/70 text-sm">Active Preachers</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+<i class="ri-global-line text-white text-xl"></i>
+</div>
+<div class="text-left">
+<h3 class="text-white font-semibold">15+</h3>
+<p class="text-white/70 text-sm">Cities Covered</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Statistics Section -->
+<section class="py-16 bg-gray-50">
+<div class="container mx-auto px-4">
+<h2 class="text-3xl font-bold text-center mb-12">Our Preaching Impact</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- Stat 1 -->
+<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center">
+<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+<i class="ri-file-list-3-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-2">Total Reports</h3>
+<p class="text-4xl font-bold text-primary stat-counter" data-target="12458">0</p>
+</div>
+<!-- Stat 2 -->
+<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center">
+<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+<i class="ri-book-open-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-2">Books Distributed</h3>
+<p class="text-4xl font-bold text-primary stat-counter" data-target="87632">0</p>
+</div>
+<!-- Stat 3 -->
+<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center">
+<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+<i class="ri-restaurant-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-2">Prasadam Served</h3>
+<p class="text-4xl font-bold text-primary stat-counter" data-target="156890">0</p>
+</div>
+<!-- Stat 4 -->
+<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center">
+<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+<i class="ri-team-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-2">Active Preachers</h3>
+<p class="text-4xl font-bold text-primary stat-counter" data-target="1247">0</p>
+</div>
+</div>
+<!-- Charts Section -->
+<div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="bg-white p-6 rounded shadow-md">
+<h3 class="text-xl font-semibold mb-4">Preaching Activities by Zone</h3>
+<div id="barChart" class="w-full h-80"></div>
+</div>
+<div class="bg-white p-6 rounded shadow-md">
+<h3 class="text-xl font-semibold mb-4">Distribution by Category</h3>
+<div id="pieChart" class="w-full h-80"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Dashboard Section -->
+<section id="dashboard" class="py-16">
+<div class="container mx-auto px-4">
+<h2 class="text-3xl font-bold text-center mb-12">Preaching Dashboard</h2>
+<!-- Filters -->
+<div class="bg-white p-6 rounded shadow-md mb-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Region</label>
+<div class="relative">
+<button class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center">
+<span>All Regions</span>
+<i class="ri-arrow-down-s-line"></i>
+</button>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Temple</label>
+<div class="relative">
+<button class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center">
+<span>All Temples</span>
+<i class="ri-arrow-down-s-line"></i>
+</button>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+<div class="relative">
+<button class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center">
+<span>All Categories</span>
+<i class="ri-arrow-down-s-line"></i>
+</button>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+<div class="relative">
+<button class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center">
+<span>Last 30 Days</span>
+<i class="ri-arrow-down-s-line"></i>
+</button>
+</div>
+</div>
+</div>
+<div class="mt-4 flex justify-end">
+<button class="bg-primary text-white px-4 py-2 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap mr-2">
+<i class="ri-filter-3-line mr-1"></i> Apply Filters
+</button>
+<button class="bg-white text-gray-700 border border-gray-300 px-4 py-2 !rounded-button hover:bg-gray-50 transition whitespace-nowrap">
+<i class="ri-refresh-line mr-1"></i> Reset
+</button>
+</div>
+</div>
+<!-- Reports Table -->
+<div class="bg-white rounded shadow-md overflow-hidden">
+<div class="p-4 border-b border-gray-200 flex justify-between items-center">
+<h3 class="text-lg font-semibold">Recent Reports</h3>
+<div class="flex">
+<button class="bg-white text-gray-700 border border-gray-300 px-3 py-1 !rounded-button hover:bg-gray-50 transition whitespace-nowrap text-sm mr-2">
+<i class="ri-file-excel-line mr-1"></i> Export Excel
+</button>
+<button class="bg-white text-gray-700 border border-gray-300 px-3 py-1 !rounded-button hover:bg-gray-50 transition whitespace-nowrap text-sm">
+<i class="ri-file-pdf-line mr-1"></i> Export PDF
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="min-w-full divide-y divide-gray-200">
+<thead class="bg-gray-50">
+<tr>
+<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preacher</th>
+<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temple</th>
+<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
+<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Books</th>
+<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prasadam</th>
+<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="bg-white divide-y divide-gray-200">
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-04-15</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="h-8 w-8 rounded-full bg-primary bg-opacity-10 flex items-center justify-center text-primary">BG</div>
+<div class="ml-3">
+<div class="text-sm font-medium text-gray-900">Bhakta Govinda</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Kuala Lumpur</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Book Distribution</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">48</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">120</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+<button class="text-primary hover:text-primary-dark mr-3"><i class="ri-eye-line"></i></button>
+<button class="text-gray-500 hover:text-gray-700"><i class="ri-download-line"></i></button>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-04-14</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="h-8 w-8 rounded-full bg-primary bg-opacity-10 flex items-center justify-center text-primary">RD</div>
+<div class="ml-3">
+<div class="text-sm font-medium text-gray-900">Radha Devi</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Penang</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Harinama Sankirtana</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">32</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">85</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+<button class="text-primary hover:text-primary-dark mr-3"><i class="ri-eye-line"></i></button>
+<button class="text-gray-500 hover:text-gray-700"><i class="ri-download-line"></i></button>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-04-13</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="h-8 w-8 rounded-full bg-primary bg-opacity-10 flex items-center justify-center text-primary">KD</div>
+<div class="ml-3">
+<div class="text-sm font-medium text-gray-900">Krishna Das</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Johor Bahru</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">University Program</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">65</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">210</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+<button class="text-primary hover:text-primary-dark mr-3"><i class="ri-eye-line"></i></button>
+<button class="text-gray-500 hover:text-gray-700"><i class="ri-download-line"></i></button>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-04-12</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="h-8 w-8 rounded-full bg-primary bg-opacity-10 flex items-center justify-center text-primary">NS</div>
+<div class="ml-3">
+<div class="text-sm font-medium text-gray-900">Nityananda Swami</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Kuching</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Food for Life</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">24</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">350</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+<button class="text-primary hover:text-primary-dark mr-3"><i class="ri-eye-line"></i></button>
+<button class="text-gray-500 hover:text-gray-700"><i class="ri-download-line"></i></button>
+</td>
+</tr>
+<tr>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-04-11</td>
+<td class="px-6 py-4 whitespace-nowrap">
+<div class="flex items-center">
+<div class="h-8 w-8 rounded-full bg-primary bg-opacity-10 flex items-center justify-center text-primary">GP</div>
+<div class="ml-3">
+<div class="text-sm font-medium text-gray-900">Gaura Prabhu</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Ipoh</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Sunday Feast</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">42</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">175</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+<button class="text-primary hover:text-primary-dark mr-3"><i class="ri-eye-line"></i></button>
+<button class="text-gray-500 hover:text-gray-700"><i class="ri-download-line"></i></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+<div class="flex items-center justify-between">
+<div class="flex-1 flex justify-between sm:hidden">
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Previous</button>
+<button class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Next</button>
+</div>
+<div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+<div>
+<p class="text-sm text-gray-700">
+Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">42</span> results
+</p>
+</div>
+<div>
+<nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+<button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+<span class="sr-only">Previous</span>
+<i class="ri-arrow-left-s-line"></i>
+</button>
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-primary text-sm font-medium text-white hover:bg-primary-dark">1</button>
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</button>
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</button>
+<span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">8</button>
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">9</button>
+<button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+<span class="sr-only">Next</span>
+<i class="ri-arrow-right-s-line"></i>
+</button>
+</nav>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Resources Section -->
+<section id="resources" class="py-16 bg-gray-50">
+<div class="container mx-auto px-4">
+<h2 class="text-3xl font-bold text-center mb-12">Preaching Resources</h2>
+<!-- Resource Tabs -->
+<div class="mb-8 flex justify-center">
+<div class="inline-flex p-1 bg-white rounded-full shadow-sm">
+<button id="books-tab" class="px-6 py-2 rounded-full bg-primary text-white whitespace-nowrap">Books & Pamphlets</button>
+<button id="presentations-tab" class="px-6 py-2 rounded-full text-gray-700 hover:bg-gray-100 whitespace-nowrap">Presentations</button>
+<button id="videos-tab" class="px-6 py-2 rounded-full text-gray-700 hover:bg-gray-100 whitespace-nowrap">Videos & Audio</button>
+<button id="templates-tab" class="px-6 py-2 rounded-full text-gray-700 hover:bg-gray-100 whitespace-nowrap">Templates</button>
+</div>
+</div>
+<div id="books-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Original books and pamphlets content -->
+</div>
+<div id="presentations-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
+<!-- Presentation 1 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Professional%20PowerPoint%20presentation%20about%20Krishna%20consciousness%20philosophy%2C%20clean%20modern%20slides%2C%20spiritual%20diagrams%2C%20teaching%20materials%2C%20high%20quality%20graphics%2C%20light%20background&width=600&height=400&seq=18&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Introduction to Krishna Consciousness</h3>
+<p class="text-gray-600 text-sm mb-4">Comprehensive presentation for newcomers about the basics of Krishna consciousness philosophy.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">PPTX • 8.5 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+<!-- Presentation 2 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Bhagavad%20Gita%20chapter%20summary%20presentation%2C%20elegant%20slides%20with%20Sanskrit%20verses%2C%20spiritual%20artwork%2C%20teaching%20materials%2C%20high%20quality%20graphics%2C%20light%20background&width=600&height=400&seq=19&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Bhagavad Gita Chapter Summaries</h3>
+<p class="text-gray-600 text-sm mb-4">Chapter-wise presentation of Bhagavad Gita with key verses and explanations.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">PPTX • 12.3 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+<!-- Presentation 3 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Vedic%20culture%20and%20traditions%20presentation%2C%20colorful%20slides%20about%20festivals%20and%20customs%2C%20educational%20content%2C%20high%20quality%20graphics%2C%20light%20background&width=600&height=400&seq=20&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Vedic Culture & Traditions</h3>
+<p class="text-gray-600 text-sm mb-4">Educational presentation about Vedic customs, festivals, and traditional practices.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">PPTX • 15.8 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+<!-- Presentation 4 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Temple%20worship%20and%20deity%20service%20presentation%2C%20detailed%20slides%20about%20altar%20setup%20and%20puja%2C%20instructional%20content%2C%20high%20quality%20graphics%2C%20light%20background&width=600&height=400&seq=21&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Temple Worship Guidelines</h3>
+<p class="text-gray-600 text-sm mb-4">Detailed presentation about temple services, deity worship, and altar arrangements.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">PPTX • 10.2 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Search and Filter -->
+<div class="bg-white p-4 rounded shadow-md mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+<div class="relative w-full md:w-1/2">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<i class="ri-search-line text-gray-400"></i>
+</div>
+<input type="text" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm" placeholder="Search resources...">
+</div>
+<div class="flex items-center gap-4 w-full md:w-auto">
+<div class="flex items-center">
+<label class="mr-2 text-sm text-gray-700">Language:</label>
+<div class="relative">
+<button class="bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center w-40">
+<span>All Languages</span>
+<i class="ri-arrow-down-s-line"></i>
+</button>
+</div>
+</div>
+<div class="flex items-center">
+<label class="mr-2 text-sm text-gray-700">Sort by:</label>
+<div class="relative">
+<button class="bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center w-40">
+<span>Most Recent</span>
+<i class="ri-arrow-down-s-line"></i>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Resource Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Resource 1 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Bhagavad%20Gita%20book%20with%20ornate%20cover%2C%20golden%20embossing%2C%20spiritual%20text%2C%20high%20quality%2C%20professional%20photography%2C%20detailed%20cover%20art%2C%20soft%20lighting%2C%20clean%20background%2C%20product%20photography&width=600&height=400&seq=2&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Bhagavad Gita As It Is</h3>
+<p class="text-gray-600 text-sm mb-4">The definitive guide to understanding the essence of Krishna consciousness and spiritual knowledge.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">English • PDF • 968 KB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+<!-- Resource 2 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Colorful%20pamphlet%20about%20Krishna%20consciousness%2C%20vibrant%20spiritual%20illustrations%2C%20informational%20brochure%2C%20clean%20design%2C%20professional%20print%20material%2C%20high%20quality%2C%20detailed%20graphics&width=600&height=400&seq=3&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Introduction to Krishna Consciousness</h3>
+<p class="text-gray-600 text-sm mb-4">A beginner's guide to understanding the philosophy and practices of Krishna consciousness.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">Multiple Languages • PDF • 4.2 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+<!-- Resource 3 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Spiritual%20cookbook%20with%20vegetarian%20prasadam%20recipes%2C%20beautifully%20arranged%20food%20offerings%2C%20colorful%20Indian%20dishes%2C%20professional%20food%20photography%2C%20high%20quality%2C%20detailed%20presentation&width=600&height=400&seq=4&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Higher Taste: Vegetarian Cookbook</h3>
+<p class="text-gray-600 text-sm mb-4">Delicious vegetarian recipes for preparing prasadam offerings with devotion and love.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">English • PDF • 12.5 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+<!-- Resource 4 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Chanting%20beads%20%28japa%20mala%29%20with%20instruction%20manual%2C%20wooden%20beads%20on%20spiritual%20cloth%2C%20meditation%20tools%2C%20soft%20lighting%2C%20clean%20background%2C%20product%20photography%2C%20high%20quality&width=600&height=400&seq=5&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Japa Meditation Guide</h3>
+<p class="text-gray-600 text-sm mb-4">A comprehensive guide to chanting the Hare Krishna maha-mantra with attention and devotion.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">English • PDF • 3.8 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+<!-- Resource 5 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Colorful%20festival%20guide%20for%20Janmashtami%20celebration%2C%20decorations%2C%20altar%20setup%2C%20Krishna%20worship%2C%20festive%20atmosphere%2C%20professional%20photography%2C%20high%20quality%2C%20detailed%20instructions&width=600&height=400&seq=6&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Festival Guide: Janmashtami</h3>
+<p class="text-gray-600 text-sm mb-4">Complete planning guide for organizing a successful Janmashtami celebration at your center.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">English • PDF • 8.7 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+<!-- Resource 6 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Professional%20PowerPoint%20presentation%20about%20Bhagavad%20Gita%20philosophy%2C%20clean%20slides%2C%20spiritual%20diagrams%2C%20teaching%20materials%2C%20high%20quality%2C%20detailed%20graphics&width=600&height=400&seq=7&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Bhagavad Gita Presentation</h3>
+<p class="text-gray-600 text-sm mb-4">Ready-to-use presentation slides for teaching the core concepts of Bhagavad Gita philosophy.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">English • PPTX • 15.2 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+<!-- Resource 7 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Spiritual%20outreach%20flyer%20template%2C%20clean%20design%2C%20vibrant%20colors%2C%20professional%20layout%2C%20event%20announcement%2C%20high%20quality%2C%20detailed%20graphics&width=600&height=400&seq=8&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Outreach Flyer Templates</h3>
+<p class="text-gray-600 text-sm mb-4">Customizable flyer templates for promoting your temple events and programs in the community.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">Multiple Formats • ZIP • 24.5 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+<!-- Resource 8 -->
+<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
+<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Kirtan%20music%20audio%20tracks%2C%20traditional%20instruments%2C%20devotional%20singing%2C%20professional%20audio%20recording%2C%20high%20quality%2C%20detailed%20album%20cover&width=600&height=400&seq=9&orientation=landscape'); background-size: cover; background-position: center;"></div>
+<div class="p-4">
+<h3 class="font-semibold text-lg mb-2">Kirtan Music Collection</h3>
+<p class="text-gray-600 text-sm mb-4">A collection of beautiful kirtans and bhajans for temple programs and personal meditation.</p>
+<div class="flex justify-between items-center">
+<span class="text-xs text-gray-500">MP3 • ZIP • 86.3 MB</span>
+<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
+<i class="ri-download-line mr-1"></i> Download
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-8 flex justify-center">
+<nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+<button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+<span class="sr-only">Previous</span>
+<i class="ri-arrow-left-s-line"></i>
+</button>
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-primary text-sm font-medium text-white hover:bg-primary-dark">1</button>
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</button>
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</button>
+<span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">8</button>
+<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">9</button>
+<button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+<span class="sr-only">Next</span>
+<i class="ri-arrow-right-s-line"></i>
+</button>
+</nav>
+</div>
+</div>
+</section>
+<!-- About Section -->
+<section id="about" class="py-16">
+<div class="container mx-auto px-4">
+<h2 class="text-3xl font-bold text-center mb-12">About Our Mission</h2>
+<div class="bg-white p-8 rounded shadow-md mb-12">
+<div class="flex flex-col md:flex-row gap-8 items-center">
+<div class="w-full md:w-1/2">
+<h3 class="text-2xl font-semibold mb-4">ISKCON Malaysia Preaching Vision</h3>
+<p class="text-gray-700 mb-4">The ISKCON Malaysia Preaching Network is dedicated to spreading the timeless wisdom of Vedic knowledge and Krishna consciousness throughout Malaysia, fostering spiritual growth and community development.</p>
+<p class="text-gray-700 mb-4">Our mission is to systematically organize preaching activities across the country, support dedicated preachers, and create a sustainable ecosystem for spiritual education and practice.</p>
+<p class="text-gray-700">Through our mobile app and coordinated efforts, we aim to reach every town and village in Malaysia with the message of love, compassion, and spiritual wisdom as taught by His Divine Grace A.C. Bhaktivedanta Swami Prabhupada.</p>
+</div>
+<div class="w-full md:w-1/2">
+<img src="https://readdy.ai/api/search-image?query=Devotees%20engaged%20in%20preaching%20activities%2C%20sharing%20spiritual%20knowledge%2C%20book%20distribution%2C%20colorful%20traditional%20dress%2C%20joyful%20atmosphere%2C%20outdoor%20setting%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=10&orientation=landscape" alt="ISKCON Preaching" class="rounded shadow-md w-full h-auto">
+</div>
+</div>
+</div>
+<!-- Photo Gallery -->
+<h3 class="text-2xl font-semibold text-center mb-8">Our Preaching Activities</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+<div class="overflow-hidden rounded shadow-md">
+<img src="https://readdy.ai/api/search-image?query=Hare%20Krishna%20devotees%20performing%20kirtan%20with%20traditional%20instruments%2C%20colorful%20festival%2C%20joyful%20singing%2C%20outdoor%20event%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=11&orientation=landscape" alt="Kirtan Performance" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
+</div>
+<div class="overflow-hidden rounded shadow-md">
+<img src="https://readdy.ai/api/search-image?query=Food%20distribution%20program%2C%20prasadam%20serving%20to%20people%20in%20need%2C%20charity%20work%2C%20volunteers%20in%20action%2C%20community%20service%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=12&orientation=landscape" alt="Food Distribution" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
+</div>
+<div class="overflow-hidden rounded shadow-md">
+<img src="https://readdy.ai/api/search-image?query=Book%20distribution%20at%20university%20campus%2C%20students%20receiving%20spiritual%20literature%2C%20educational%20outreach%2C%20young%20people%20engaged%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=13&orientation=landscape" alt="Book Distribution" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
+</div>
+<div class="overflow-hidden rounded shadow-md">
+<img src="https://readdy.ai/api/search-image?query=Ratha%20Yatra%20festival%20in%20Malaysia%2C%20colorful%20chariot%20procession%2C%20crowds%20of%20devotees%2C%20cultural%20celebration%2C%20traditional%20decorations%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=14&orientation=landscape" alt="Ratha Yatra Festival" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
+</div>
+<div class="overflow-hidden rounded shadow-md">
+<img src="https://readdy.ai/api/search-image?query=Spiritual%20retreat%20in%20natural%20setting%2C%20meditation%20session%2C%20devotees%20in%20peaceful%20surroundings%2C%20yoga%20practice%2C%20serene%20atmosphere%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=15&orientation=landscape" alt="Spiritual Retreat" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
+</div>
+<div class="overflow-hidden rounded shadow-md">
+<img src="https://readdy.ai/api/search-image?query=Youth%20program%20at%20ISKCON%20temple%2C%20young%20devotees%20learning%20traditional%20arts%2C%20cultural%20education%2C%20engaging%20activities%2C%20colorful%20setting%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=16&orientation=landscape" alt="Youth Program" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
+</div>
+</div>
+</div>
+</section>
+<!-- Download App Section -->
+<section class="py-16 bg-gradient-to-r from-primary/10 to-secondary/10">
+<div class="container mx-auto px-4">
+<div class="flex flex-col lg:flex-row items-center justify-between gap-12">
+<div class="w-full lg:w-1/2">
+<h2 class="text-3xl font-bold mb-6">Download Our Preaching App</h2>
+<p class="text-gray-700 mb-8">Stay connected with the ISKCON Malaysia Preaching Network through our mobile app. Track your preaching activities, access resources, and coordinate with other devotees on the go.</p>
+<div class="space-y-4">
+<div class="flex items-start space-x-4">
+<div class="w-10 h-10 flex items-center justify-center bg-primary/10 rounded-full flex-shrink-0">
+<i class="ri-file-list-3-line text-primary"></i>
+</div>
+<div>
+<h3 class="font-semibold mb-1">Easy Activity Reporting</h3>
+<p class="text-gray-600 text-sm">Record and submit your preaching activities with just a few taps</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="w-10 h-10 flex items-center justify-center bg-primary/10 rounded-full flex-shrink-0">
+<i class="ri-book-open-line text-primary"></i>
+</div>
+<div>
+<h3 class="font-semibold mb-1">Digital Library</h3>
+<p class="text-gray-600 text-sm">Access preaching resources and materials anytime, anywhere</p>
+</div>
+</div>
+<div class="flex items-start space-x-4">
+<div class="w-10 h-10 flex items-center justify-center bg-primary/10 rounded-full flex-shrink-0">
+<i class="ri-team-line text-primary"></i>
+</div>
+<div>
+<h3 class="font-semibold mb-1">Community Connect</h3>
+<p class="text-gray-600 text-sm">Coordinate with other preachers and stay updated with temple activities</p>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap gap-4 mt-8">
+<a href="#" class="flex items-center bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-900 transition">
+<i class="ri-apple-fill text-3xl mr-3"></i>
+<div class="text-left">
+<div class="text-xs">Download on the</div>
+<div class="text-sm font-semibold">App Store</div>
+</div>
+</a>
+<a href="#" class="flex items-center bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-900 transition">
+<i class="ri-google-play-fill text-3xl mr-3"></i>
+<div class="text-left">
+<div class="text-xs">Get it on</div>
+<div class="text-sm font-semibold">Google Play</div>
+</div>
+</a>
+</div>
+</div>
+<div class="w-full lg:w-1/2">
+<img src="https://readdy.ai/api/search-image?query=Modern%20smartphone%20displaying%20spiritual%20app%20interface%2C%20clean%20design%2C%20devotional%20content%2C%20user-friendly%20layout%2C%20professional%20mockup%2C%20high%20quality%20rendering%2C%20detailed%20UI%20elements%2C%20light%20background&width=600&height=600&seq=17&orientation=squarish" alt="Preaching App Preview" class="w-full max-w-md mx-auto rounded-2xl shadow-2xl">
+</div>
+</div>
+</div>
+</section>
+<!-- Contact Section -->
+<section id="contact" class="py-16 bg-gray-50">
+<div class="container mx-auto px-4">
+<h2 class="text-3xl font-bold text-center mb-12">Contact Us</h2>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Contact Form -->
+<div class="bg-white p-8 rounded shadow-md">
+<h3 class="text-xl font-semibold mb-6">Send Us a Message</h3>
+<form>
+<div class="mb-4">
+<label for="name" class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+<input type="text" id="name" class="w-full px-4 py-2 border border-gray-300 rounded text-sm" placeholder="Enter your name">
+</div>
+<div class="mb-4">
+<label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+<input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded text-sm" placeholder="Enter your email">
+</div>
+<div class="mb-4">
+<label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+<input type="text" id="subject" class="w-full px-4 py-2 border border-gray-300 rounded text-sm" placeholder="Enter subject">
+</div>
+<div class="mb-6">
+<label for="message" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+<textarea id="message" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded text-sm" placeholder="Enter your message"></textarea>
+</div>
+<div class="flex items-center mb-6">
+<label class="custom-checkbox">
+<input type="checkbox">
+<span class="checkbox-mark"></span>
+</label>
+<span class="ml-2 text-sm text-gray-700">I agree to receive updates about ISKCON Malaysia activities</span>
+</div>
+<button type="submit" class="bg-primary text-white px-6 py-3 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap w-full">Send Message</button>
+</form>
+</div>
+<!-- Map and Info -->
+<div>
+<div class="bg-white p-8 rounded shadow-md mb-8">
+<h3 class="text-xl font-semibold mb-6">Our Temples</h3>
+<div class="h-64 bg-gray-200 rounded mb-6 overflow-hidden">
+<img src="https://public.readdy.ai/gen_page/map_placeholder_1280x720.png" alt="Map" class="w-full h-full object-cover">
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="border border-gray-200 p-4 rounded">
+<h4 class="font-semibold mb-2">Kuala Lumpur Temple</h4>
+<p class="text-sm text-gray-600 mb-2">Lot 5, Lorong Utara B, Section 52, 46200 Petaling Jaya, Selangor</p>
+<p class="text-sm text-gray-600">+60 3-7956 1233</p>
+</div>
+<div class="border border-gray-200 p-4 rounded">
+<h4 class="font-semibold mb-2">Penang Temple</h4>
+<p class="text-sm text-gray-600 mb-2">72, Jalan Utama, 10450 Georgetown, Penang</p>
+<p class="text-sm text-gray-600">+60 4-229 5133</p>
+</div>
+</div>
+</div>
+<div class="bg-white p-8 rounded shadow-md">
+<h3 class="text-xl font-semibold mb-6">Connect With Us</h3>
+<div class="flex flex-wrap gap-4">
+<a href="#" class="flex items-center bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+<i class="ri-facebook-fill mr-2"></i> Facebook
+</a>
+<a href="#" class="flex items-center bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition">
+<i class="ri-instagram-fill mr-2"></i> Instagram
+</a>
+<a href="#" class="flex items-center bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+<i class="ri-youtube-fill mr-2"></i> YouTube
+</a>
+<a href="#" class="flex items-center bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+<i class="ri-whatsapp-fill mr-2"></i> WhatsApp
+</a>
+</div>
+<div class="mt-6">
+<h4 class="font-semibold mb-2">Email Us</h4>
+<a href="mailto:info@iskconmalaysia.org" class="text-primary hover:underline">info@iskconmalaysia.org</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-12">
+<div class="container mx-auto px-4">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-gray-800 text-white py-12">
+<div class="container mx-auto px-4">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div>
+<h3 class="text-xl font-semibold mb-4">ISKCON Malaysia</h3>
+<p class="text-gray-300 mb-4">Spreading the message of Bhagavad Gita and the holy name of Krishna throughout Malaysia.</p>
+<div class="flex space-x-4">
+<a href="#" class="text-gray-300 hover:text-white">
+<i class="ri-facebook-fill ri-lg"></i>
+</a>
+<a href="#" class="text-gray-300 hover:text-white">
+<i class="ri-instagram-fill ri-lg"></i>
+</a>
+<a href="#" class="text-gray-300 hover:text-white">
+<i class="ri-youtube-fill ri-lg"></i>
+</a>
+<a href="#" class="text-gray-300 hover:text-white">
+<i class="ri-whatsapp-fill ri-lg"></i>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-xl font-semibold mb-4">Quick Links</h3>
+<ul class="space-y-2">
+<li><a href="#" class="text-gray-300 hover:text-white">Home</a></li>
+<li><a href="#dashboard" class="text-gray-300 hover:text-white">Dashboard</a></li>
+<li><a href="#resources" class="text-gray-300 hover:text-white">Resources</a></li>
+<li><a href="#about" class="text-gray-300 hover:text-white">About</a></li>
+<li><a href="#contact" class="text-gray-300 hover:text-white">Contact</a></li>
+<li><a href="#" class="text-gray-300 hover:text-white">Privacy Policy</a></li>
+</ul>
+</div>
+<div>
+<h3 class="text-xl font-semibold mb-4">Newsletter</h3>
+<p class="text-gray-300 mb-4">Subscribe to receive updates on our activities and events.</p>
+<form class="flex">
+<input type="email" class="px-4 py-2 w-full rounded-l text-gray-800 text-sm border-none" placeholder="Your email address">
+<button type="submit" class="bg-primary text-white px-4 py-2 rounded-r hover:bg-opacity-90 transition whitespace-nowrap">Subscribe</button>
+</form>
+</div>
+</div>
+<div class="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+<p class="text-gray-400 text-sm mb-4 md:mb-0">© 2025 ISKCON Malaysia. All rights reserved.</p>
+<div class="flex items-center space-x-4">
+<span class="text-gray-400 text-sm">Powered by ISKCON Malaysia</span>
+<div class="flex space-x-2">
+<i class="ri-visa-fill ri-lg text-gray-300"></i>
+<i class="ri-mastercard-fill ri-lg text-gray-300"></i>
+<i class="ri-paypal-fill ri-lg text-gray-300"></i>
+</div>
+</div>
+</div>
+</div>
+</footer>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// Tab Switching
+const tabs = {
+'books-tab': 'books-content',
+'presentations-tab': 'presentations-content',
+'videos-tab': 'videos-content',
+'templates-tab': 'templates-content'
+};
+Object.keys(tabs).forEach(tabId => {
+const tabButton = document.getElementById(tabId);
+if (tabButton) {
+tabButton.addEventListener('click', () => {
+// Update tab buttons
+Object.keys(tabs).forEach(id => {
+const button = document.getElementById(id);
+if (button) {
+if (id === tabId) {
+button.classList.remove('text-gray-700', 'hover:bg-gray-100');
+button.classList.add('bg-primary', 'text-white');
+} else {
+button.classList.remove('bg-primary', 'text-white');
+button.classList.add('text-gray-700', 'hover:bg-gray-100');
+}
+}
+});
+// Update content visibility
+Object.values(tabs).forEach(contentId => {
+const content = document.getElementById(contentId);
+if (content) {
+content.classList.toggle('hidden', contentId !== tabs[tabId]);
+}
+});
+});
+}
+});
+// Counter Animation
+const counters = document.querySelectorAll('.stat-counter');
+counters.forEach(counter => {
+const target = parseInt(counter.getAttribute('data-target'));
+const duration = 2000; // 2 seconds
+const step = target / (duration / 16); // 60fps
+let current = 0;
+const updateCounter = () => {
+current += step;
+if (current < target) {
+counter.textContent = Math.floor(current).toLocaleString();
+requestAnimationFrame(updateCounter);
+} else {
+counter.textContent = target.toLocaleString();
+}
+};
+updateCounter();
+});
+});
+document.addEventListener('DOMContentLoaded', function() {
+// Bar Chart
+const barChart = echarts.init(document.getElementById('barChart'));
+const barOption = {
+animation: false,
+tooltip: {
+trigger: 'axis',
+backgroundColor: 'rgba(255, 255, 255, 0.8)',
+textStyle: {
+color: '#1f2937'
+}
+},
+legend: {
+data: ['Books', 'Prasadam', 'Events'],
+textStyle: {
+color: '#1f2937'
+}
+},
+grid: {
+left: '3%',
+right: '4%',
+bottom: '3%',
+top: '15%',
+containLabel: true
+},
+xAxis: {
+type: 'category',
+data: ['Kuala Lumpur', 'Penang', 'Johor', 'Ipoh', 'Kuching'],
+axisLine: {
+lineStyle: {
+color: '#1f2937'
+}
+},
+axisLabel: {
+color: '#1f2937'
+}
+},
+yAxis: {
+type: 'value',
+axisLine: {
+lineStyle: {
+color: '#1f2937'
+}
+},
+axisLabel: {
+color: '#1f2937'
+}
+},
+series: [
+{
+name: 'Books',
+type: 'bar',
+data: [2500, 1800, 1200, 950, 750],
+itemStyle: {
+color: 'rgba(87, 181, 231, 1)',
+borderRadius: 4
+}
+},
+{
+name: 'Prasadam',
+type: 'bar',
+data: [4500, 3200, 2800, 2100, 1900],
+itemStyle: {
+color: 'rgba(141, 211, 199, 1)',
+borderRadius: 4
+}
+},
+{
+name: 'Events',
+type: 'bar',
+data: [120, 85, 70, 65, 50],
+itemStyle: {
+color: 'rgba(251, 191, 114, 1)',
+borderRadius: 4
+}
+}
+]
+};
+barChart.setOption(barOption);
+// Pie Chart
+const pieChart = echarts.init(document.getElementById('pieChart'));
+const pieOption = {
+animation: false,
+tooltip: {
+trigger: 'item',
+backgroundColor: 'rgba(255, 255, 255, 0.8)',
+textStyle: {
+color: '#1f2937'
+}
+},
+legend: {
+orient: 'vertical',
+right: 10,
+top: 'center',
+textStyle: {
+color: '#1f2937'
+}
+},
+series: [
+{
+name: 'Distribution',
+type: 'pie',
+radius: ['40%', '70%'],
+center: ['40%', '50%'],
+avoidLabelOverlap: false,
+itemStyle: {
+borderRadius: 8
+},
+label: {
+show: false
+},
+emphasis: {
+label: {
+show: true,
+fontSize: '14',
+fontWeight: 'bold'
+}
+},
+labelLine: {
+show: false
+},
+data: [
+{ value: 42, name: 'Book Distribution', itemStyle: { color: 'rgba(87, 181, 231, 1)' } },
+{ value: 28, name: 'Harinama', itemStyle: { color: 'rgba(141, 211, 199, 1)' } },
+{ value: 18, name: 'Food for Life', itemStyle: { color: 'rgba(251, 191, 114, 1)' } },
+{ value: 12, name: 'Temple Programs', itemStyle: { color: 'rgba(252, 141, 98, 1)' } }
+]
+}
+]
+};
+pieChart.setOption(pieOption);
+// Resize charts when window size changes
+window.addEventListener('resize', function() {
+barChart.resize();
+pieChart.resize();
+});
+});
+</script>
+</body>
+</html>
