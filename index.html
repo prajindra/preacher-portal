@@ -217,56 +217,298 @@ top: -100px;
 right: -100px;
 bottom: -100px;
 }
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+from {
+opacity: 0;
+transform: translateY(20px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+@keyframes slideInLeft {
+from {
+opacity: 0;
+transform: translateX(-50px);
+}
+to {
+opacity: 1;
+transform: translateX(0);
+}
+}
+
+@keyframes slideInRight {
+from {
+opacity: 0;
+transform: translateX(50px);
+}
+to {
+opacity: 1;
+transform: translateX(0);
+}
+}
+
+@keyframes slideInUp {
+from {
+opacity: 0;
+transform: translateY(50px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+@keyframes bounce {
+0%, 20%, 50%, 80%, 100% {
+transform: translateY(0);
+}
+40% {
+transform: translateY(-10px);
+}
+60% {
+transform: translateY(-5px);
+}
+}
+
+@keyframes pulse {
+0% {
+transform: scale(1);
+}
+50% {
+transform: scale(1.05);
+}
+100% {
+transform: scale(1);
+}
+}
+
+@keyframes float {
+0%, 100% {
+transform: translateY(0px);
+}
+50% {
+transform: translateY(-10px);
+}
+}
+
+@keyframes rotate {
+from {
+transform: rotate(0deg);
+}
+to {
+transform: rotate(360deg);
+}
+}
+
+@keyframes shimmer {
+0% {
+background-position: -200px 0;
+}
+100% {
+background-position: calc(200px + 100%) 0;
+}
+}
+
+/* Animation Classes */
+.animate-fade-in {
+animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-slide-in-left {
+animation: slideInLeft 0.8s ease-out forwards;
+}
+
+.animate-slide-in-right {
+animation: slideInRight 0.8s ease-out forwards;
+}
+
+.animate-slide-in-up {
+animation: slideInUp 0.8s ease-out forwards;
+}
+
+.animate-bounce {
+animation: bounce 2s infinite;
+}
+
+.animate-pulse {
+animation: pulse 2s infinite;
+}
+
+.animate-float {
+animation: float 3s ease-in-out infinite;
+}
+
+.animate-rotate {
+animation: rotate 20s linear infinite;
+}
+
+.animate-shimmer {
+background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+background-size: 200px 100%;
+animation: shimmer 2s infinite;
+}
+
+/* Hover Animations */
+.hover-lift {
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+transform: translateY(-5px);
+box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.hover-scale {
+transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+transform: scale(1.05);
+}
+
+.hover-glow {
+transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+box-shadow: 0 0 20px rgba(255, 153, 51, 0.5);
+}
+
+/* Stagger Animation Delays */
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+.animate-delay-500 { animation-delay: 0.5s; }
+.animate-delay-600 { animation-delay: 0.6s; }
+.animate-delay-700 { animation-delay: 0.7s; }
+.animate-delay-800 { animation-delay: 0.8s; }
+
+/* Loading States */
+.loading-shimmer {
+background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+background-size: 200% 100%;
+animation: shimmer 1.5s infinite;
+}
 </style>
 </head>
 <body class="bg-white">
 <!-- Navigation -->
-<nav class="bg-white shadow-md fixed w-full z-50">
+<nav class="bg-white shadow-md fixed w-full z-50 animate-slide-in-up">
 <div class="container mx-auto px-4">
 <div class="flex justify-between items-center h-20">
 <div class="flex items-center">
-<a href="#" class="flex items-center">
-<img src="https://static.readdy.ai/image/6d35e524e60a5d85af4995c2d7119a74/37e6fbb3fe70a3e3ab4660003eaf1b2a.webp" alt="ISKCON Logo" class="h-10 mr-3">
+<a href="#" class="flex items-center hover-scale">
+<img src="https://static.readdy.ai/image/6d35e524e60a5d85af4995c2d7119a74/37e6fbb3fe70a3e3ab4660003eaf1b2a.webp" alt="ISKCON Logo" class="h-10 mr-3 animate-float">
 <span class="text-3xl font-['Pacifico'] text-primary">Malaysia</span>
 </a>
+<span id="welcome-message" class="ml-8 text-sm text-gray-700 font-bold hidden animate-fade-in"></span>
 </div>
 <div class="hidden md:flex space-x-8">
-<a href="#" class="text-gray-800 hover:text-primary font-medium">Home</a>
-<a href="#dashboard" class="text-gray-800 hover:text-primary font-medium">Dashboard</a>
-<a href="#resources" class="text-gray-800 hover:text-primary font-medium">Resources</a>
-<a href="#about" class="text-gray-800 hover:text-primary font-medium">About</a>
-<a href="#contact" class="text-gray-800 hover:text-primary font-medium">Contact</a>
+<a href="#" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">Home</a>
+<a href="#dashboard" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">Dashboard</a>
+<a href="#resources" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">Resources</a>
+<a href="#about" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">About</a>
+<a href="#contact" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">Contact</a>
 </div>
 <div class="flex items-center">
-<button id="auth-button" class="bg-primary text-white px-6 py-2 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap">
+<button id="auth-button" class="bg-primary text-white px-6 py-2 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap hover-lift hover-glow animate-pulse">
 Login / Register
 </button>
 <script type="module">
 import { auth } from './firebase-config.js';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
 
-document.getElementById('auth-button').addEventListener('click', async () => {
-  const email = prompt('Enter your email:');
-  const password = prompt('Enter your password:');
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    alert(`Welcome, ${userCredential.user.email}`);
-  } catch (error) {
-    if (error.code === 'auth/user-not-found') {
-      const createAccount = confirm('User not found. Would you like to create an account?');
-      if (createAccount) {
-        try {
-          const newUser = await createUserWithEmailAndPassword(auth, email, password);
-          alert(`Account created for ${newUser.user.email}`);
-        } catch (createError) {
-          alert(`Error creating account: ${createError.message}`);
-        }
-      }
-    } else {
-      alert(`Error: ${error.message}`);
+function initializeAuth() {
+    const authModal = document.getElementById('auth-modal');
+    const authButton = document.getElementById('auth-button');
+    const welcomeMessage = document.getElementById('welcome-message');
+    
+    // Scope all selectors to the modal to avoid conflicts
+    const closeModalButton = authModal.querySelector('#close-modal-button');
+    const authForm = authModal.querySelector('#auth-form');
+    const registerButton = authModal.querySelector('#register-button');
+    const authMessage = authModal.querySelector('#auth-message');
+
+    function showModal() {
+        authModal.classList.remove('hidden');
     }
-  }
-});
+
+    function hideModal() {
+        authModal.classList.add('hidden');
+    }
+
+    authButton.onclick = showModal;
+    closeModalButton.onclick = hideModal;
+    // The event listener for closing on outside click remains disabled as requested.
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const storedUsername = localStorage.getItem(`username_${user.uid}`) || user.email.split('@')[0];
+            welcomeMessage.textContent = `Welcome, ${storedUsername}!`;
+            welcomeMessage.classList.remove('hidden');
+            authButton.textContent = 'Logout';
+            authButton.onclick = () => {
+                signOut(auth);
+            };
+            hideModal();
+        } else {
+            welcomeMessage.classList.add('hidden');
+            authButton.textContent = 'Login / Register';
+            authButton.onclick = showModal;
+        }
+    });
+
+    authForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = authForm.querySelector('#auth-email').value.trim();
+        const password = authForm.querySelector('#auth-password').value.trim();
+        if (!email || !password) {
+            authMessage.textContent = 'Please enter both email and password for login.';
+            return;
+        }
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            authMessage.textContent = `Error: ${error.message}`;
+        }
+    });
+
+    registerButton.addEventListener('click', async () => {
+        const username = authForm.querySelector('#auth-username').value.trim();
+        const email = authForm.querySelector('#auth-email').value.trim();
+        const password = authForm.querySelector('#auth-password').value.trim();
+        if (!email || !password) {
+            authMessage.textContent = 'Please enter both email and password for registration.';
+            return;
+        }
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            if (username) {
+                localStorage.setItem(`username_${userCredential.user.uid}`, username);
+            }
+        } catch (error) {
+            authMessage.textContent = `Error creating account: ${error.message}`;
+        }
+    });
+}
+
+// Load modal and then initialize auth logic
+fetch('auth.html')
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById('modal-placeholder').innerHTML = `
+            <div id="auth-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-[9999] p-4">
+                ${html}
+            </div>
+        `;
+        initializeAuth();
+    });
 </script>
 <div class="md:hidden ml-4 w-10 h-10 flex items-center justify-center">
 <i class="ri-menu-line ri-lg"></i>
@@ -282,21 +524,21 @@ document.getElementById('auth-button').addEventListener('click', async () => {
 </div>
 <div class="container mx-auto px-4 py-16 relative">
 <div class="max-w-3xl">
-<h1 class="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">Empowering Preachers, <br/>Uplifting Souls</h1>
-<p class="text-xl text-white/90 mb-12 leading-relaxed">Join the ISKCON Malaysia Preaching Network and be part of a spiritual revolution that transforms lives through divine knowledge.</p>
-<div class="flex flex-col sm:flex-row gap-6">
-<button class="bg-white text-primary px-10 py-4 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap font-semibold text-lg group flex items-center justify-center">
+<h1 class="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight animate-slide-in-left">Empowering Preachers, <br/>Uplifting Souls</h1>
+<p class="text-xl text-white/90 mb-12 leading-relaxed animate-slide-in-left animate-delay-200">Join the ISKCON Malaysia Preaching Network and be part of a spiritual revolution that transforms lives through divine knowledge.</p>
+<div class="flex flex-col sm:flex-row gap-6 animate-slide-in-up animate-delay-400">
+<button class="bg-white text-primary px-10 py-4 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap font-semibold text-lg group flex items-center justify-center hover-lift hover-glow">
 Join as a Preacher
 <i class="ri-arrow-right-line ml-2 group-hover:translate-x-1 transition-transform"></i>
 </button>
-<button class="bg-primary/10 backdrop-blur-sm text-white border-2 border-white/20 px-10 py-4 !rounded-button hover:bg-primary/20 transition whitespace-nowrap font-semibold text-lg flex items-center justify-center">
+<button class="bg-primary/10 backdrop-blur-sm text-white border-2 border-white/20 px-10 py-4 !rounded-button hover:bg-primary/20 transition whitespace-nowrap font-semibold text-lg flex items-center justify-center hover-lift">
 Explore Reports
 <i class="ri-line-chart-line ml-2"></i>
 </button>
 </div>
 <div class="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8">
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+<div class="flex items-center gap-4 animate-slide-in-up animate-delay-600">
+<div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center animate-pulse">
 <i class="ri-heart-line text-white text-xl"></i>
 </div>
 <div class="text-left">
@@ -304,8 +546,8 @@ Explore Reports
 <p class="text-white/70 text-sm">Lives Touched</p>
 </div>
 </div>
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+<div class="flex items-center gap-4 animate-slide-in-up animate-delay-700">
+<div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center animate-pulse">
 <i class="ri-team-line text-white text-xl"></i>
 </div>
 <div class="text-left">
@@ -313,8 +555,8 @@ Explore Reports
 <p class="text-white/70 text-sm">Active Preachers</p>
 </div>
 </div>
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+<div class="flex items-center gap-4 animate-slide-in-up animate-delay-800">
+<div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center animate-pulse">
 <i class="ri-global-line text-white text-xl"></i>
 </div>
 <div class="text-left">
@@ -332,32 +574,32 @@ Explore Reports
 <h2 class="text-3xl font-bold text-center mb-12">Our Preaching Impact</h2>
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 <!-- Stat 1 -->
-<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center">
-<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center hover-lift animate-slide-in-up animate-delay-100">
+<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center animate-float">
 <i class="ri-file-list-3-line ri-xl text-primary"></i>
 </div>
 <h3 class="text-xl font-semibold mb-2">Total Reports</h3>
 <p class="text-4xl font-bold text-primary stat-counter" data-target="12458">0</p>
 </div>
 <!-- Stat 2 -->
-<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center">
-<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center hover-lift animate-slide-in-up animate-delay-200">
+<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center animate-float">
 <i class="ri-book-open-line ri-xl text-primary"></i>
 </div>
 <h3 class="text-xl font-semibold mb-2">Books Distributed</h3>
 <p class="text-4xl font-bold text-primary stat-counter" data-target="87632">0</p>
 </div>
 <!-- Stat 3 -->
-<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center">
-<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center hover-lift animate-slide-in-up animate-delay-300">
+<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center animate-float">
 <i class="ri-restaurant-line ri-xl text-primary"></i>
 </div>
 <h3 class="text-xl font-semibold mb-2">Prasadam Served</h3>
 <p class="text-4xl font-bold text-primary stat-counter" data-target="156890">0</p>
 </div>
 <!-- Stat 4 -->
-<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center">
-<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center">
+<div class="bg-white p-6 rounded shadow-md hover:shadow-lg transition text-center hover-lift animate-slide-in-up animate-delay-400">
+<div class="w-16 h-16 mx-auto mb-4 bg-primary bg-opacity-10 rounded-full flex items-center justify-center animate-float">
 <i class="ri-team-line ri-xl text-primary"></i>
 </div>
 <h3 class="text-xl font-semibold mb-2">Active Preachers</h3>
@@ -1072,6 +1314,9 @@ Showing <span class="font-medium">1</span> to <span class="font-medium">5</span>
 </div>
 </div>
 </footer>
+
+<div id="modal-placeholder"></div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 // Tab Switching
