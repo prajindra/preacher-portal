@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery - ISKCON Malaysia</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#FF9933',secondary:'#FFD700'}}}}</script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .gallery-item {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .upload-area.dragover {
+            border-color: #FF9933;
+            background-color: rgba(255, 153, 51, 0.1);
+        }
+        .modal {
+            backdrop-filter: blur(5px);
+        }
+        .image-preview {
+            max-height: 80vh;
+            max-width: 90vw;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center">
+                        <img src="https://static.readdy.ai/image/6d35e524e60a5d85af4995c2d7119a74/37e6fbb3fe70a3e3ab4660003eaf1b2a.webp" alt="ISKCON Logo" class="h-8 mr-3">
+                        <span class="text-2xl font-bold text-primary">Gallery</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-gray-600 hover:text-primary transition-colors">
+                        <i class="ri-home-line mr-1"></i> Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Gallery Tabs -->
+        <div class="mb-8">
+            <div class="flex justify-center">
+                <div class="inline-flex p-1 bg-white rounded-lg shadow-sm">
+                    <button id="mission-tab" class="px-6 py-2 rounded-md bg-primary text-white font-medium transition-all">
+                        Mission Images
+                    </button>
+                    <button id="activities-tab" class="px-6 py-2 rounded-md text-gray-700 hover:bg-gray-100 font-medium transition-all">
+                        Preaching Activities
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mission Images Section -->
+        <div id="mission-section" class="gallery-section">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Mission Images</h2>
+                
+                <!-- Upload Area -->
+                <div class="upload-area rounded-lg p-8 text-center mb-6" id="mission-upload">
+                    <div class="mb-4">
+                        <i class="ri-upload-cloud-2-line text-4xl text-gray-400"></i>
+                    </div>
+                    <p class="text-gray-600 mb-2">Drag and drop images here or</p>
+                    <button class="bg-primary text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition">
+                        Choose Files
+                    </button>
+                    <input type="file" id="mission-file-input" multiple accept="image/*" class="hidden">
+                    <p class="text-sm text-gray-500 mt-2">Supports: JPG, PNG, GIF (Max 5MB each)</p>
+                </div>
+
+                <!-- Mission Gallery Grid -->
+                <div id="mission-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Sample mission images will be loaded here -->
+                </div>
+
+                <!-- Mission Pagination -->
+                <div id="mission-pagination" class="flex justify-center">
+                    <!-- Pagination will be generated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Preaching Activities Section -->
+        <div id="activities-section" class="gallery-section hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">Preaching Activities Images</h2>
+                
+                <!-- Upload Area -->
+                <div class="upload-area rounded-lg p-8 text-center mb-6" id="activities-upload">
+                    <div class="mb-4">
+                        <i class="ri-upload-cloud-2-line text-4xl text-gray-400"></i>
+                    </div>
+                    <p class="text-gray-600 mb-2">Drag and drop images here or</p>
+                    <button class="bg-primary text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition">
+                        Choose Files
+                    </button>
+                    <input type="file" id="activities-file-input" multiple accept="image/*" class="hidden">
+                    <p class="text-sm text-gray-500 mt-2">Supports: JPG, PNG, GIF (Max 5MB each)</p>
+                </div>
+
+                <!-- Activities Gallery Grid -->
+                <div id="activities-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Sample activities images will be loaded here -->
+                </div>
+
+                <!-- Activities Pagination -->
+                <div id="activities-pagination" class="flex justify-center">
+                    <!-- Pagination will be generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 modal hidden z-50 flex items-center justify-center p-4">
+        <div class="relative max-w-full max-h-full">
+            <button id="close-modal" class="absolute -top-10 right-0 text-white text-2xl hover:text-gray-300">
+                <i class="ri-close-line"></i>
+            </button>
+            <img id="modal-image" src="" alt="" class="image-preview rounded-lg">
+            <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded">
+                <span id="image-counter">1 / 10</span>
+            </div>
+            <button id="prev-image" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white text-3xl hover:text-gray-300">
+                <i class="ri-arrow-left-line"></i>
+            </button>
+            <button id="next-image" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white text-3xl hover:text-gray-300">
+                <i class="ri-arrow-right-line"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 class="text-lg font-semibold mb-4">Delete Image</h3>
+            <p class="text-gray-600 mb-6">Are you sure you want to delete this image? This action cannot be undone.</p>
+            <div class="flex justify-end space-x-4">
+                <button id="cancel-delete" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">Cancel</button>
+                <button id="confirm-delete" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ImageGallery {
+            constructor() {
+                this.currentTab = 'mission';
+                this.currentPage = { mission: 1, activities: 1 };
+                this.imagesPerPage = 6;
+                this.images = {
+                    mission: [
+                        { id: 1, src: 'https://readdy.ai/api/search-image?query=ISKCON%20temple%20mission%20spiritual%20activities%20devotees%20worship%20ceremony&width=400&height=300&seq=1', title: 'Temple Worship', date: '2025-01-15' },
+                        { id: 2, src: 'https://readdy.ai/api/search-image?query=Krishna%20consciousness%20mission%20spiritual%20education%20teaching%20philosophy&width=400&height=300&seq=2', title: 'Spiritual Education', date: '2025-01-14' },
+                        { id: 3, src: 'https://readdy.ai/api/search-image?query=ISKCON%20community%20service%20helping%20people%20charity%20work%20mission&width=400&height=300&seq=3', title: 'Community Service', date: '2025-01-13' },
+                        { id: 4, src: 'https://readdy.ai/api/search-image?query=Vedic%20culture%20preservation%20traditional%20arts%20mission%20heritage&width=400&height=300&seq=4', title: 'Cultural Preservation', date: '2025-01-12' },
+                        { id: 5, src: 'https://readdy.ai/api/search-image?query=ISKCON%20youth%20programs%20spiritual%20development%20mission%20activities&width=400&height=300&seq=5', title: 'Youth Programs', date: '2025-01-11' },
+                        { id: 6, src: 'https://readdy.ai/api/search-image?query=Krishna%20temple%20mission%20meditation%20spiritual%20practice%20devotion&width=400&height=300&seq=6', title: 'Meditation Programs', date: '2025-01-10' },
+                        { id: 7, src: 'https://readdy.ai/api/search-image?query=ISKCON%20mission%20outreach%20spreading%20awareness%20spiritual%20knowledge&width=400&height=300&seq=7', title: 'Outreach Programs', date: '2025-01-09' },
+                        { id: 8, src: 'https://readdy.ai/api/search-image?query=Temple%20mission%20volunteer%20service%20community%20engagement%20helping&width=400&height=300&seq=8', title: 'Volunteer Service', date: '2025-01-08' }
+                    ],
+                    activities: [
+                        { id: 1, src: 'https://readdy.ai/api/search-image?query=Hare%20Krishna%20book%20distribution%20preaching%20activities%20devotees%20sharing&width=400&height=300&seq=9', title: 'Book Distribution', date: '2025-01-20' },
+                        { id: 2, src: 'https://readdy.ai/api/search-image?query=Kirtan%20singing%20Hare%20Krishna%20preaching%20activities%20musical%20instruments&width=400&height=300&seq=10', title: 'Kirtan Performance', date: '2025-01-19' },
+                        { id: 3, src: 'https://readdy.ai/api/search-image?query=Prasadam%20distribution%20food%20sharing%20preaching%20activities%20community&width=400&height=300&seq=11', title: 'Prasadam Distribution', date: '2025-01-18' },
+                        { id: 4, src: 'https://readdy.ai/api/search-image?query=University%20preaching%20students%20spiritual%20education%20campus%20activities&width=400&height=300&seq=12', title: 'University Preaching', date: '2025-01-17' },
+                        { id: 5, src: 'https://readdy.ai/api/search-image?query=Street%20preaching%20Hare%20Krishna%20public%20activities%20devotees%20sharing&width=400&height=300&seq=13', title: 'Street Preaching', date: '2025-01-16' },
+                        { id: 6, src: 'https://readdy.ai/api/search-image?query=Festival%20preaching%20Ratha%20Yatra%20celebration%20activities%20colorful&width=400&height=300&seq=14', title: 'Festival Preaching', date: '2025-01-15' },
+                        { id: 7, src: 'https://readdy.ai/api/search-image?query=Home%20programs%20preaching%20activities%20family%20spiritual%20gathering&width=400&height=300&seq=15', title: 'Home Programs', date: '2025-01-14' },
+                        { id: 8, src: 'https://readdy.ai/api/search-image?query=Corporate%20preaching%20office%20spiritual%20programs%20workplace%20activities&width=400&height=300&seq=16', title: 'Corporate Programs', date: '2025-01-13' },
+                        { id: 9, src: 'https://readdy.ai/api/search-image?query=Hospital%20preaching%20spiritual%20care%20healing%20activities%20compassion&width=400&height=300&seq=17', title: 'Hospital Visits', date: '2025-01-12' },
+                        { id: 10, src: 'https://readdy.ai/api/search-image?query=Prison%20preaching%20rehabilitation%20spiritual%20guidance%20activities%20hope&width=400&height=300&seq=18', title: 'Prison Programs', date: '2025-01-11' },
+                        { id: 11, src: 'https://readdy.ai/api/search-image?query=Children%20preaching%20activities%20spiritual%20education%20kids%20learning&width=400&height=300&seq=19', title: 'Children Programs', date: '2025-01-10' },
+                        { id: 12, src: 'https://readdy.ai/api/search-image?query=Senior%20citizens%20preaching%20elderly%20spiritual%20care%20activities&width=400&height=300&seq=20', title: 'Senior Programs', date: '2025-01-09' }
+                    ]
+                };
+                this.currentImages = [];
+                this.currentImageIndex = 0;
+                this.imageToDelete = null;
+                
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.switchTab('mission');
+            }
+
+            setupEventListeners() {
+                // Tab switching
+                document.getElementById('mission-tab').addEventListener('click', () => this.switchTab('mission'));
+                document.getElementById('activities-tab').addEventListener('click', () => this.switchTab('activities'));
+
+                // File upload
+                this.setupFileUpload('mission');
+                this.setupFileUpload('activities');
+
+                // Modal events
+                document.getElementById('close-modal').addEventListener('click', () => this.closeModal());
+                document.getElementById('prev-image').addEventListener('click', () => this.showPrevImage());
+                document.getElementById('next-image').addEventListener('click', () => this.showNextImage());
+                document.getElementById('image-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'image-modal') this.closeModal();
+                });
+
+                // Delete modal events
+                document.getElementById('cancel-delete').addEventListener('click', () => this.closeDeleteModal());
+                document.getElementById('confirm-delete').addEventListener('click', () => this.deleteImage());
+
+                // Keyboard navigation
+                document.addEventListener('keydown', (e) => {
+                    if (document.getElementById('image-modal').classList.contains('hidden')) return;
+                    
+                    switch(e.key) {
+                        case 'Escape':
+                            this.closeModal();
+                            break;
+                        case 'ArrowLeft':
+                            this.showPrevImage();
+                            break;
+                        case 'ArrowRight':
+                            this.showNextImage();
+                            break;
+                    }
+                });
+            }
+
+            setupFileUpload(type) {
+                const uploadArea = document.getElementById(`${type}-upload`);
+                const fileInput = document.getElementById(`${type}-file-input`);
+                const button = uploadArea.querySelector('button');
+
+                button.addEventListener('click', () => fileInput.click());
+
+                fileInput.addEventListener('change', (e) => this.handleFileSelect(e, type));
+
+                // Drag and drop
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    this.handleFileSelect({ target: { files: e.dataTransfer.files } }, type);
+                });
+            }
+
+            handleFileSelect(event, type) {
+                const files = Array.from(event.target.files);
+                
+                files.forEach(file => {
+                    if (file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const newImage = {
+                                id: Date.now() + Math.random(),
+                                src: e.target.result,
+                                title: file.name.replace(/\.[^/.]+$/, ""),
+                                date: new Date().toISOString().split('T')[0]
+                            };
+                            this.images[type].unshift(newImage);
+                            this.renderGallery();
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        alert('Please select valid image files under 5MB.');
+                    }
+                });
+            }
+
+            switchTab(tab) {
+                this.currentTab = tab;
+                
+                // Update tab buttons
+                document.getElementById('mission-tab').classList.toggle('bg-primary', tab === 'mission');
+                document.getElementById('mission-tab').classList.toggle('text-white', tab === 'mission');
+                document.getElementById('mission-tab').classList.toggle('text-gray-700', tab !== 'mission');
+                
+                document.getElementById('activities-tab').classList.toggle('bg-primary', tab === 'activities');
+                document.getElementById('activities-tab').classList.toggle('text-white', tab === 'activities');
+                document.getElementById('activities-tab').classList.toggle('text-gray-700', tab !== 'activities');
+
+                // Show/hide sections
+                document.getElementById('mission-section').classList.toggle('hidden', tab !== 'mission');
+                document.getElementById('activities-section').classList.toggle('hidden', tab !== 'activities');
+
+                this.renderGallery();
+            }
+
+            renderGallery() {
+                const gallery = document.getElementById(`${this.currentTab}-gallery`);
+                const pagination = document.getElementById(`${this.currentTab}-pagination`);
+                const images = this.images[this.currentTab];
+                const currentPage = this.currentPage[this.currentTab];
+                
+                const startIndex = (currentPage - 1) * this.imagesPerPage;
+                const endIndex = startIndex + this.imagesPerPage;
+                const pageImages = images.slice(startIndex, endIndex);
+                
+                // Render images
+                gallery.innerHTML = pageImages.map((image, index) => `
+                    <div class="gallery-item bg-white rounded-lg shadow-md overflow-hidden">
+                        <div class="relative">
+                            <img src="${image.src}" alt="${image.title}" 
+                                 class="w-full h-48 object-cover cursor-pointer"
+                                 onclick="gallery.openModal(${startIndex + index})">
+                            <button class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition"
+                                    onclick="gallery.confirmDelete(${image.id})">
+                                <i class="ri-delete-bin-line text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-semibold text-gray-800 mb-1">${image.title}</h3>
+                            <p class="text-sm text-gray-500">${image.date}</p>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Render pagination
+                const totalPages = Math.ceil(images.length / this.imagesPerPage);
+                if (totalPages > 1) {
+                    pagination.innerHTML = this.renderPagination(currentPage, totalPages);
+                } else {
+                    pagination.innerHTML = '';
+                }
+            }
+
+            renderPagination(currentPage, totalPages) {
+                let pagination = `
+                    <nav class="flex items-center space-x-1">
+                        <button class="px-3 py-2 text-gray-500 hover:text-gray-700 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}"
+                                onclick="gallery.changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                            <i class="ri-arrow-left-line"></i>
+                        </button>
+                `;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentPage) {
+                        pagination += `<button class="px-4 py-2 bg-primary text-white rounded">${i}</button>`;
+                    } else if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                        pagination += `<button class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded" onclick="gallery.changePage(${i})">${i}</button>`;
+                    } else if (i === currentPage - 2 || i === currentPage + 2) {
+                        pagination += `<span class="px-2 py-2 text-gray-500">...</span>`;
+                    }
+                }
+
+                pagination += `
+                        <button class="px-3 py-2 text-gray-500 hover:text-gray-700 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}"
+                                onclick="gallery.changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                            <i class="ri-arrow-right-line"></i>
+                        </button>
+                    </nav>
+                `;
+
+                return pagination;
+            }
+
+            changePage(page) {
+                const totalPages = Math.ceil(this.images[this.currentTab].length / this.imagesPerPage);
+                if (page >= 1 && page <= totalPages) {
+                    this.currentPage[this.currentTab] = page;
+                    this.renderGallery();
+                }
+            }
+
+            openModal(index) {
+                this.currentImages = this.images[this.currentTab];
+                this.currentImageIndex = index;
+                this.showModalImage();
+                document.getElementById('image-modal').classList.remove('hidden');
+            }
+
+            showModalImage() {
+                const image = this.currentImages[this.currentImageIndex];
+                document.getElementById('modal-image').src = image.src;
+                document.getElementById('modal-image').alt = image.title;
+                document.getElementById('image-counter').textContent = 
+                    `${this.currentImageIndex + 1} / ${this.currentImages.length}`;
+            }
+
+            showPrevImage() {
+                if (this.currentImageIndex > 0) {
+                    this.currentImageIndex--;
+                    this.showModalImage();
+                }
+            }
+
+            showNextImage() {
+                if (this.currentImageIndex < this.currentImages.length - 1) {
+                    this.currentImageIndex++;
+                    this.showModalImage();
+                }
+            }
+
+            closeModal() {
+                document.getElementById('image-modal').classList.add('hidden');
+            }
+
+            confirmDelete(imageId) {
+                this.imageToDelete = imageId;
+                document.getElementById('delete-modal').classList.remove('hidden');
+            }
+
+            closeDeleteModal() {
+                document.getElementById('delete-modal').classList.add('hidden');
+                this.imageToDelete = null;
+            }
+
+            deleteImage() {
+                if (this.imageToDelete) {
+                    this.images[this.currentTab] = this.images[this.currentTab].filter(
+                        img => img.id !== this.imageToDelete
+                    );
+                    this.renderGallery();
+                    this.closeDeleteModal();
+                }
+            }
+        }
+
+        // Initialize gallery
+        const gallery = new ImageGallery();
+    </script>
+</body>
+</html>
