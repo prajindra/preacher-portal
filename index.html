@@ -6,6 +6,7 @@
 <title>ISKCON Malaysia Preaching Network</title>
 <script src="https://cdn.tailwindcss.com/3.4.16"></script>
 <script type="module" src="./firebase-config.js"></script>
+<script type="module" src="./firebase-data.js"></script>
 <script>tailwind.config={theme:{extend:{colors:{primary:'#FF9933',secondary:'#FFD700'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -612,7 +613,7 @@ Explore Reports
 <!-- Charts Section -->
 <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
 <div class="bg-white p-6 rounded shadow-md">
-<h3 class="text-xl font-semibold mb-4">Preaching Activities by Zone</h3>
+<h3 class="text-xl font-semibold mb-4">Preaching Activities by Temple</h3>
 <div id="barChart" class="w-full h-80"></div>
 </div>
 <div class="bg-white p-6 rounded shadow-md">
@@ -628,49 +629,42 @@ Explore Reports
 <h2 class="text-3xl font-bold text-center mb-12">Preaching Dashboard</h2>
 <!-- Filters -->
 <div class="bg-white p-6 rounded shadow-md mb-8">
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-<div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Region</label>
-<div class="relative">
-<button class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center">
-<span>All Regions</span>
-<i class="ri-arrow-down-s-line"></i>
-</button>
-</div>
-</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 <div>
 <label class="block text-sm font-medium text-gray-700 mb-1">Temple</label>
 <div class="relative">
-<button class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center">
-<span>All Temples</span>
-<i class="ri-arrow-down-s-line"></i>
-</button>
+<select id="temple-filter" class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+<option value="">All Temples</option>
+</select>
 </div>
 </div>
 <div>
 <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
 <div class="relative">
-<button class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center">
-<span>All Categories</span>
-<i class="ri-arrow-down-s-line"></i>
-</button>
+<select id="category-filter" class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+<option value="">All Categories</option>
+</select>
 </div>
 </div>
 <div>
 <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
 <div class="relative">
-<button class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center">
-<span>Last 30 Days</span>
-<i class="ri-arrow-down-s-line"></i>
-</button>
+<select id="date-range-filter" class="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+<option value="30">Last 30 Days</option>
+<option value="7">Last 7 Days</option>
+<option value="90">Last 3 Months</option>
+<option value="180">Last 6 Months</option>
+<option value="365">Last Year</option>
+<option value="all">All Time</option>
+</select>
 </div>
 </div>
 </div>
 <div class="mt-4 flex justify-end">
-<button class="bg-primary text-white px-4 py-2 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap mr-2">
+<button id="apply-filters-btn" class="bg-primary text-white px-4 py-2 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap mr-2">
 <i class="ri-filter-3-line mr-1"></i> Apply Filters
 </button>
-<button class="bg-white text-gray-700 border border-gray-300 px-4 py-2 !rounded-button hover:bg-gray-50 transition whitespace-nowrap">
+<button id="reset-filters-btn" class="bg-white text-gray-700 border border-gray-300 px-4 py-2 !rounded-button hover:bg-gray-50 transition whitespace-nowrap">
 <i class="ri-refresh-line mr-1"></i> Reset
 </button>
 </div>
@@ -680,10 +674,10 @@ Explore Reports
 <div class="p-4 border-b border-gray-200 flex justify-between items-center">
 <h3 class="text-lg font-semibold">Recent Reports</h3>
 <div class="flex">
-<button class="bg-white text-gray-700 border border-gray-300 px-3 py-1 !rounded-button hover:bg-gray-50 transition whitespace-nowrap text-sm mr-2">
+<button onclick="exportToExcel()" class="bg-white text-gray-700 border border-gray-300 px-3 py-1 !rounded-button hover:bg-gray-50 transition whitespace-nowrap text-sm mr-2">
 <i class="ri-file-excel-line mr-1"></i> Export Excel
 </button>
-<button class="bg-white text-gray-700 border border-gray-300 px-3 py-1 !rounded-button hover:bg-gray-50 transition whitespace-nowrap text-sm">
+<button onclick="exportToPDF()" class="bg-white text-gray-700 border border-gray-300 px-3 py-1 !rounded-button hover:bg-gray-50 transition whitespace-nowrap text-sm">
 <i class="ri-file-pdf-line mr-1"></i> Export PDF
 </button>
 </div>
@@ -802,32 +796,20 @@ Explore Reports
 </div>
 <div class="px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
 <div class="flex items-center justify-between">
-<div class="flex-1 flex justify-between sm:hidden">
-<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Previous</button>
-<button class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Next</button>
-</div>
 <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
 <div>
-<p class="text-sm text-gray-700">
+<p class="text-sm text-gray-700" id="pagination-info">
 Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">42</span> results
 </p>
 </div>
 <div>
-<nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-<button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-<span class="sr-only">Previous</span>
-<i class="ri-arrow-left-s-line"></i>
-</button>
+<nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination" id="pagination-controls">
 <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-primary text-sm font-medium text-white hover:bg-primary-dark">1</button>
 <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</button>
 <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</button>
 <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
 <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">8</button>
 <button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">9</button>
-<button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-<span class="sr-only">Next</span>
-<i class="ri-arrow-right-s-line"></i>
-</button>
 </nav>
 </div>
 </div>
@@ -1320,198 +1302,894 @@ Showing <span class="font-medium">1</span> to <span class="font-medium">5</span>
 
 <div id="modal-placeholder"></div>
 
-<script>
+<script type="module">
+import { 
+    calculatePreachingImpact, 
+    getRecentReports, 
+    getChartData, 
+    getPieChartData,
+    listenToActivityReports 
+} from './firebase-data.js';
+
 document.addEventListener('DOMContentLoaded', function() {
-// Tab Switching
-const tabs = {
-'books-tab': 'books-content',
-'presentations-tab': 'presentations-content',
-'videos-tab': 'videos-content',
-'templates-tab': 'templates-content'
+    // Tab Switching
+    const tabs = {
+        'books-tab': 'books-content',
+        'presentations-tab': 'presentations-content',
+        'videos-tab': 'videos-content',
+        'templates-tab': 'templates-content'
+    };
+    Object.keys(tabs).forEach(tabId => {
+        const tabButton = document.getElementById(tabId);
+        if (tabButton) {
+            tabButton.addEventListener('click', () => {
+                // Update tab buttons
+                Object.keys(tabs).forEach(id => {
+                    const button = document.getElementById(id);
+                    if (button) {
+                        if (id === tabId) {
+                            button.classList.remove('text-gray-700', 'hover:bg-gray-100');
+                            button.classList.add('bg-primary', 'text-white');
+                        } else {
+                            button.classList.remove('bg-primary', 'text-white');
+                            button.classList.add('text-gray-700', 'hover:bg-gray-100');
+                        }
+                    }
+                });
+                // Update content visibility
+                Object.values(tabs).forEach(contentId => {
+                    const content = document.getElementById(contentId);
+                    if (content) {
+                        content.classList.toggle('hidden', contentId !== tabs[tabId]);
+                    }
+                });
+            });
+        }
+    });
+
+    // Initialize Firebase data loading
+    initializeFirebaseData();
+    
+    // Initialize dashboard filters
+    initializeDashboardFilters();
+});
+
+// Counter Animation Function
+function animateCounter(element, target) {
+    const duration = 2000; // 2 seconds
+    const step = target / (duration / 16); // 60fps
+    let current = 0;
+    
+    const updateCounter = () => {
+        current += step;
+        if (current < target) {
+            element.textContent = Math.floor(current).toLocaleString();
+            requestAnimationFrame(updateCounter);
+        } else {
+            element.textContent = target.toLocaleString();
+        }
+    };
+    updateCounter();
+}
+
+// Initialize Firebase Data
+async function initializeFirebaseData() {
+    try {
+        // Show loading state
+        showLoadingState();
+        
+        // Load preaching impact statistics
+        await loadPreachingImpact();
+        
+        // Load dashboard table
+        await loadDashboardTable();
+        
+        // Load charts
+        await loadCharts();
+        
+        // Set up real-time listener for updates
+        setupRealtimeListener();
+        
+        console.log('Firebase data integration completed successfully');
+    } catch (error) {
+        console.error('Error initializing Firebase data:', error);
+        showErrorState();
+    }
+}
+
+// Show loading state
+function showLoadingState() {
+    const counters = document.querySelectorAll('.stat-counter');
+    counters.forEach(counter => {
+        counter.textContent = 'Loading...';
+        counter.classList.add('loading-shimmer');
+    });
+}
+
+// Show error state
+function showErrorState() {
+    const counters = document.querySelectorAll('.stat-counter');
+    counters.forEach(counter => {
+        counter.textContent = 'Error';
+        counter.classList.remove('loading-shimmer');
+    });
+}
+
+// Load Preaching Impact Statistics
+async function loadPreachingImpact() {
+    try {
+        const impact = await calculatePreachingImpact();
+        
+        // Update counters with real data
+        const counters = document.querySelectorAll('.stat-counter');
+        const stats = [
+            impact.totalReports,
+            impact.totalBooksDistributed,
+            impact.totalPrasadamServed,
+            impact.activePreachers
+        ];
+        
+        counters.forEach((counter, index) => {
+            counter.classList.remove('loading-shimmer');
+            if (stats[index] !== undefined) {
+                counter.setAttribute('data-target', stats[index]);
+                animateCounter(counter, stats[index]);
+            }
+        });
+
+        // Update hero section statistics with new values
+        updateHeroStatistics(impact);
+        
+        console.log('Preaching impact loaded:', impact);
+    } catch (error) {
+        console.error('Error loading preaching impact:', error);
+    }
+}
+
+// Update Hero Section Statistics
+function updateHeroStatistics(impact) {
+    try {
+        // Find the hero section statistics elements
+        const heroStats = document.querySelectorAll('.mt-16.grid.grid-cols-1.sm\\:grid-cols-3 .text-left h3');
+        
+        if (heroStats.length >= 3) {
+            // Update Lives Touched (new contacts)
+            if (impact.livesTouched !== undefined) {
+                heroStats[0].textContent = formatNumber(impact.livesTouched) + '+';
+            }
+            
+            // Update Active Preachers (total registered users)
+            if (impact.activePreachers !== undefined) {
+                heroStats[1].textContent = formatNumber(impact.activePreachers) + '+';
+            }
+            
+            // Update Cities Covered (temples with reports)
+            if (impact.citiesCovered !== undefined) {
+                heroStats[2].textContent = formatNumber(impact.citiesCovered) + '+';
+            }
+        }
+        
+        console.log('Hero statistics updated:', {
+            livesTouched: impact.livesTouched,
+            activePreachers: impact.activePreachers,
+            citiesCovered: impact.citiesCovered
+        });
+    } catch (error) {
+        console.error('Error updating hero statistics:', error);
+    }
+}
+
+// Format number for display (e.g., 1000 -> 1K, 1500 -> 1.5K)
+function formatNumber(num) {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    }
+    if (num >= 1000) {
+        return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+    }
+    return num.toString();
+}
+
+// Load Dashboard Table
+async function loadDashboardTable() {
+    try {
+        // This function is now handled by initializeDashboardFilters()
+        // which loads all data and sets up pagination properly
+        console.log('Dashboard table loading handled by initializeDashboardFilters()');
+    } catch (error) {
+        console.error('Error loading dashboard table:', error);
+    }
+}
+
+// Create table row for report
+function createTableRow(report) {
+    const row = document.createElement('tr');
+    
+    // Get initials for avatar
+    const initials = report.preacher.split(' ').map(name => name.charAt(0)).join('').substring(0, 2).toUpperCase();
+    
+    row.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.date}</td>
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+                <div class="h-8 w-8 rounded-full bg-primary bg-opacity-10 flex items-center justify-center text-primary">${initials}</div>
+                <div class="ml-3">
+                    <div class="text-sm font-medium text-gray-900">${report.preacher}</div>
+                </div>
+            </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.temple}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.activity}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.books}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.prasadam}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <button class="text-primary hover:text-primary-dark mr-3" onclick="viewReport('${report.id}')">
+                <i class="ri-eye-line"></i>
+            </button>
+            <button class="text-gray-500 hover:text-gray-700" onclick="downloadReport('${report.id}')">
+                <i class="ri-download-line"></i>
+            </button>
+        </td>
+    `;
+    
+    return row;
+}
+
+// Load Charts
+async function loadCharts() {
+    try {
+        // Load bar chart data
+        const chartData = await getChartData();
+        updateBarChart(chartData);
+        
+        // Load pie chart data
+        const pieData = await getPieChartData();
+        updatePieChart(pieData);
+        
+        console.log('Charts loaded successfully');
+    } catch (error) {
+        console.error('Error loading charts:', error);
+    }
+}
+
+// Update Bar Chart
+function updateBarChart(data) {
+    const barChart = echarts.init(document.getElementById('barChart'));
+    const barOption = {
+        animation: true,
+        tooltip: {
+            trigger: 'axis',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            textStyle: {
+                color: '#1f2937'
+            }
+        },
+        legend: {
+            data: ['Books', 'Prasadam', 'Events'],
+            textStyle: {
+                color: '#1f2937'
+            }
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            top: '15%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            data: data.regions,
+            axisLine: {
+                lineStyle: {
+                    color: '#1f2937'
+                }
+            },
+            axisLabel: {
+                color: '#1f2937'
+            }
+        },
+        yAxis: {
+            type: 'value',
+            axisLine: {
+                lineStyle: {
+                    color: '#1f2937'
+                }
+            },
+            axisLabel: {
+                color: '#1f2937'
+            }
+        },
+        series: [
+            {
+                name: 'Books',
+                type: 'bar',
+                data: data.booksData,
+                itemStyle: {
+                    color: 'rgba(87, 181, 231, 1)',
+                    borderRadius: 4
+                }
+            },
+            {
+                name: 'Prasadam',
+                type: 'bar',
+                data: data.prasadamData,
+                itemStyle: {
+                    color: 'rgba(141, 211, 199, 1)',
+                    borderRadius: 4
+                }
+            },
+            {
+                name: 'Events',
+                type: 'bar',
+                data: data.eventsData,
+                itemStyle: {
+                    color: 'rgba(251, 191, 114, 1)',
+                    borderRadius: 4
+                }
+            }
+        ]
+    };
+    barChart.setOption(barOption);
+    
+    // Resize chart when window size changes
+    window.addEventListener('resize', function() {
+        barChart.resize();
+    });
+}
+
+// Update Pie Chart
+function updatePieChart(data) {
+    const pieChart = echarts.init(document.getElementById('pieChart'));
+    
+    // Define colors for different categories
+    const colors = [
+        'rgba(87, 181, 231, 1)',
+        'rgba(141, 211, 199, 1)',
+        'rgba(251, 191, 114, 1)',
+        'rgba(252, 141, 98, 1)',
+        'rgba(188, 128, 189, 1)'
+    ];
+    
+    // Add colors to data
+    const coloredData = data.map((item, index) => ({
+        ...item,
+        itemStyle: { color: colors[index % colors.length] }
+    }));
+    
+    const pieOption = {
+        animation: true,
+        tooltip: {
+            trigger: 'item',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            textStyle: {
+                color: '#1f2937'
+            }
+        },
+        legend: {
+            orient: 'vertical',
+            right: 10,
+            top: 'center',
+            textStyle: {
+                color: '#1f2937'
+            }
+        },
+        series: [
+            {
+                name: 'Distribution',
+                type: 'pie',
+                radius: ['40%', '70%'],
+                center: ['40%', '50%'],
+                avoidLabelOverlap: false,
+                itemStyle: {
+                    borderRadius: 8
+                },
+                label: {
+                    show: false
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: '14',
+                        fontWeight: 'bold'
+                    }
+                },
+                labelLine: {
+                    show: false
+                },
+                data: coloredData
+            }
+        ]
+    };
+    pieChart.setOption(pieOption);
+    
+    // Resize chart when window size changes
+    window.addEventListener('resize', function() {
+        pieChart.resize();
+    });
+}
+
+// Setup Real-time Listener
+function setupRealtimeListener() {
+    try {
+        const unsubscribe = listenToActivityReports((reports) => {
+            console.log('Real-time update received:', reports.length, 'reports');
+            // Refresh data when new reports are added
+            loadPreachingImpact();
+            loadCharts();
+            // Re-initialize dashboard filters to get updated data and pagination
+            initializeDashboardFilters();
+        });
+        
+        // Store unsubscribe function for cleanup if needed
+        window.firebaseUnsubscribe = unsubscribe;
+    } catch (error) {
+        console.error('Error setting up real-time listener:', error);
+    }
+}
+
+// Utility functions for table actions
+window.viewReport = function(reportId) {
+    console.log('Viewing report:', reportId);
+    // Implement view report functionality
+    alert('View report functionality - Report ID: ' + reportId);
 };
-Object.keys(tabs).forEach(tabId => {
-const tabButton = document.getElementById(tabId);
-if (tabButton) {
-tabButton.addEventListener('click', () => {
-// Update tab buttons
-Object.keys(tabs).forEach(id => {
-const button = document.getElementById(id);
-if (button) {
-if (id === tabId) {
-button.classList.remove('text-gray-700', 'hover:bg-gray-100');
-button.classList.add('bg-primary', 'text-white');
-} else {
-button.classList.remove('bg-primary', 'text-white');
-button.classList.add('text-gray-700', 'hover:bg-gray-100');
-}
-}
-});
-// Update content visibility
-Object.values(tabs).forEach(contentId => {
-const content = document.getElementById(contentId);
-if (content) {
-content.classList.toggle('hidden', contentId !== tabs[tabId]);
-}
-});
-});
-}
-});
-// Counter Animation
-const counters = document.querySelectorAll('.stat-counter');
-counters.forEach(counter => {
-const target = parseInt(counter.getAttribute('data-target'));
-const duration = 2000; // 2 seconds
-const step = target / (duration / 16); // 60fps
-let current = 0;
-const updateCounter = () => {
-current += step;
-if (current < target) {
-counter.textContent = Math.floor(current).toLocaleString();
-requestAnimationFrame(updateCounter);
-} else {
-counter.textContent = target.toLocaleString();
-}
+
+window.downloadReport = function(reportId) {
+    console.log('Downloading report:', reportId);
+    // Implement download report functionality
+    alert('Download report functionality - Report ID: ' + reportId);
 };
-updateCounter();
-});
-});
-document.addEventListener('DOMContentLoaded', function() {
-// Bar Chart
-const barChart = echarts.init(document.getElementById('barChart'));
-const barOption = {
-animation: false,
-tooltip: {
-trigger: 'axis',
-backgroundColor: 'rgba(255, 255, 255, 0.8)',
-textStyle: {
-color: '#1f2937'
-}
-},
-legend: {
-data: ['Books', 'Prasadam', 'Events'],
-textStyle: {
-color: '#1f2937'
-}
-},
-grid: {
-left: '3%',
-right: '4%',
-bottom: '3%',
-top: '15%',
-containLabel: true
-},
-xAxis: {
-type: 'category',
-data: ['Kuala Lumpur', 'Penang', 'Johor', 'Ipoh', 'Kuching'],
-axisLine: {
-lineStyle: {
-color: '#1f2937'
-}
-},
-axisLabel: {
-color: '#1f2937'
-}
-},
-yAxis: {
-type: 'value',
-axisLine: {
-lineStyle: {
-color: '#1f2937'
-}
-},
-axisLabel: {
-color: '#1f2937'
-}
-},
-series: [
-{
-name: 'Books',
-type: 'bar',
-data: [2500, 1800, 1200, 950, 750],
-itemStyle: {
-color: 'rgba(87, 181, 231, 1)',
-borderRadius: 4
-}
-},
-{
-name: 'Prasadam',
-type: 'bar',
-data: [4500, 3200, 2800, 2100, 1900],
-itemStyle: {
-color: 'rgba(141, 211, 199, 1)',
-borderRadius: 4
-}
-},
-{
-name: 'Events',
-type: 'bar',
-data: [120, 85, 70, 65, 50],
-itemStyle: {
-color: 'rgba(251, 191, 114, 1)',
-borderRadius: 4
-}
-}
-]
+
+// Refresh data function
+window.refreshData = function() {
+    console.log('Refreshing data...');
+    initializeFirebaseData();
 };
-barChart.setOption(barOption);
-// Pie Chart
-const pieChart = echarts.init(document.getElementById('pieChart'));
-const pieOption = {
-animation: false,
-tooltip: {
-trigger: 'item',
-backgroundColor: 'rgba(255, 255, 255, 0.8)',
-textStyle: {
-color: '#1f2937'
+
+// Global variables for filtering and pagination
+let allReports = [];
+let filteredReports = [];
+let availableTemples = [];
+let availableCategories = [];
+let currentPage = 1;
+let reportsPerPage = 10;
+let totalPages = 1;
+
+// Initialize Dashboard Filters
+async function initializeDashboardFilters() {
+    try {
+        // Import Firebase functions
+        const { fetchActivityReports, fetchPreachingCategories, fetchUsers } = await import('./firebase-data.js');
+        
+        // Load all data for filtering
+        const [reports, categories, users] = await Promise.all([
+            fetchActivityReports(),
+            fetchPreachingCategories(),
+            fetchUsers()
+        ]);
+        
+        // Process and store data
+        allReports = reports.map(report => {
+            const category = categories[report.categoryId] || {};
+            const user = users[report.createdBy] || {};
+            
+            // Calculate total books
+            let totalBooks = 0;
+            if (report.booksDistributed) {
+                if (typeof report.booksDistributed === 'object') {
+                    totalBooks = (report.booksDistributed.big || 0) + 
+                               (report.booksDistributed.medium || 0) + 
+                               (report.booksDistributed.small || 0);
+                } else {
+                    totalBooks = report.booksDistributed;
+                }
+            }
+            
+            // Calculate prasadam count
+            let prasadamCount = 0;
+            if (report.prasadamServed) {
+                prasadamCount = report.prasadamServed;
+            } else if (report.contacts && Array.isArray(report.contacts)) {
+                prasadamCount = Math.floor(report.contacts.length * 1.5);
+            }
+            
+            // Get activity name
+            let activityName = 'Unknown Activity';
+            if (category && category.categoryName) {
+                activityName = category.categoryName;
+            } else if (report.categoryName) {
+                activityName = report.categoryName;
+            } else if (category && category.name) {
+                activityName = category.name;
+            }
+            
+            return {
+                id: report.id,
+                date: report.date || report.createdAt?.toDate?.()?.toISOString().split('T')[0] || 'N/A',
+                preacher: user.displayName || user.name || user.email || 'Unknown',
+                temple: user.temple || 'N/A',
+                activity: activityName,
+                categoryId: report.categoryId,
+                books: totalBooks,
+                prasadam: prasadamCount,
+                contacts: report.contacts ? report.contacts.length : 0,
+                createdAt: report.createdAt,
+                rawDate: report.createdAt?.toDate?.() || new Date(report.date || Date.now())
+            };
+        });
+        
+        // Extract unique temples and categories
+        availableTemples = [...new Set(allReports.map(report => report.temple).filter(temple => temple !== 'N/A'))].sort();
+        availableCategories = [...new Set(allReports.map(report => report.activity).filter(activity => activity !== 'Unknown Activity'))].sort();
+        
+        // Populate filter dropdowns
+        populateFilterDropdowns();
+        
+        // Set up event listeners
+        setupFilterEventListeners();
+        
+        // Initialize with all reports
+        filteredReports = [...allReports];
+        
+        // Calculate total pages and update pagination
+        totalPages = Math.ceil(filteredReports.length / reportsPerPage);
+        
+        // Update the dashboard table with pagination
+        updateDashboardTable(filteredReports);
+        
+        // Update pagination controls
+        updatePagination();
+        
+        console.log('Dashboard filters initialized successfully');
+        console.log('Available temples:', availableTemples);
+        console.log('Available categories:', availableCategories);
+        console.log('Total reports loaded:', allReports.length);
+        console.log('Pagination initialized - Total pages:', totalPages);
+        
+    } catch (error) {
+        console.error('Error initializing dashboard filters:', error);
+    }
 }
-},
-legend: {
-orient: 'vertical',
-right: 10,
-top: 'center',
-textStyle: {
-color: '#1f2937'
+
+// Populate filter dropdowns with data
+function populateFilterDropdowns() {
+    const templeFilter = document.getElementById('temple-filter');
+    const categoryFilter = document.getElementById('category-filter');
+    
+    if (templeFilter) {
+        // Clear existing options except "All Temples"
+        templeFilter.innerHTML = '<option value="">All Temples</option>';
+        
+        // Add temple options
+        availableTemples.forEach(temple => {
+            const option = document.createElement('option');
+            option.value = temple;
+            option.textContent = temple;
+            templeFilter.appendChild(option);
+        });
+    }
+    
+    if (categoryFilter) {
+        // Clear existing options except "All Categories"
+        categoryFilter.innerHTML = '<option value="">All Categories</option>';
+        
+        // Add category options
+        availableCategories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categoryFilter.appendChild(option);
+        });
+    }
 }
-},
-series: [
-{
-name: 'Distribution',
-type: 'pie',
-radius: ['40%', '70%'],
-center: ['40%', '50%'],
-avoidLabelOverlap: false,
-itemStyle: {
-borderRadius: 8
-},
-label: {
-show: false
-},
-emphasis: {
-label: {
-show: true,
-fontSize: '14',
-fontWeight: 'bold'
+
+// Set up event listeners for filters
+function setupFilterEventListeners() {
+    const applyFiltersBtn = document.getElementById('apply-filters-btn');
+    const resetFiltersBtn = document.getElementById('reset-filters-btn');
+    
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', applyFilters);
+    }
+    
+    if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', resetFilters);
+    }
+    
+    // Optional: Apply filters on change (real-time filtering)
+    const templeFilter = document.getElementById('temple-filter');
+    const categoryFilter = document.getElementById('category-filter');
+    const dateRangeFilter = document.getElementById('date-range-filter');
+    
+    if (templeFilter) {
+        templeFilter.addEventListener('change', applyFilters);
+    }
+    
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', applyFilters);
+    }
+    
+    if (dateRangeFilter) {
+        dateRangeFilter.addEventListener('change', applyFilters);
+    }
 }
-},
-labelLine: {
-show: false
-},
-data: [
-{ value: 42, name: 'Book Distribution', itemStyle: { color: 'rgba(87, 181, 231, 1)' } },
-{ value: 28, name: 'Harinama', itemStyle: { color: 'rgba(141, 211, 199, 1)' } },
-{ value: 18, name: 'Food for Life', itemStyle: { color: 'rgba(251, 191, 114, 1)' } },
-{ value: 12, name: 'Temple Programs', itemStyle: { color: 'rgba(252, 141, 98, 1)' } }
-]
+
+// Apply filters to the reports
+function applyFilters() {
+    const templeFilter = document.getElementById('temple-filter');
+    const categoryFilter = document.getElementById('category-filter');
+    const dateRangeFilter = document.getElementById('date-range-filter');
+    
+    const selectedTemple = templeFilter?.value || '';
+    const selectedCategory = categoryFilter?.value || '';
+    const selectedDateRange = dateRangeFilter?.value || '30';
+    
+    // Calculate date cutoff
+    let dateCutoff = null;
+    if (selectedDateRange !== 'all') {
+        const days = parseInt(selectedDateRange);
+        dateCutoff = new Date();
+        dateCutoff.setDate(dateCutoff.getDate() - days);
+    }
+    
+    // Filter reports
+    filteredReports = allReports.filter(report => {
+        // Temple filter
+        if (selectedTemple && report.temple !== selectedTemple) {
+            return false;
+        }
+        
+        // Category filter
+        if (selectedCategory && report.activity !== selectedCategory) {
+            return false;
+        }
+        
+        // Date range filter
+        if (dateCutoff && report.rawDate < dateCutoff) {
+            return false;
+        }
+        
+        return true;
+    });
+    
+    // Reset to first page when filters change
+    currentPage = 1;
+    
+    // Calculate total pages
+    totalPages = Math.ceil(filteredReports.length / reportsPerPage);
+    
+    // Update the table with filtered results
+    updateDashboardTable(filteredReports);
+    
+    // Update pagination
+    updatePagination();
+    
+    console.log(`Applied filters: Temple="${selectedTemple}", Category="${selectedCategory}", DateRange="${selectedDateRange}"`);
+    console.log(`Filtered results: ${filteredReports.length} out of ${allReports.length} reports`);
 }
-]
+
+// Reset all filters
+function resetFilters() {
+    const templeFilter = document.getElementById('temple-filter');
+    const categoryFilter = document.getElementById('category-filter');
+    const dateRangeFilter = document.getElementById('date-range-filter');
+    
+    if (templeFilter) templeFilter.value = '';
+    if (categoryFilter) categoryFilter.value = '';
+    if (dateRangeFilter) dateRangeFilter.value = '30';
+    
+    // Reset to show all reports
+    filteredReports = [...allReports];
+    currentPage = 1;
+    totalPages = Math.ceil(filteredReports.length / reportsPerPage);
+    
+    updateDashboardTable(filteredReports);
+    updatePagination();
+    
+    console.log('Filters reset - showing all reports');
+}
+
+// Update dashboard table with filtered data
+function updateDashboardTable(reports) {
+    const tableBody = document.querySelector('#dashboard tbody');
+    
+    if (!tableBody) return;
+    
+    // Clear existing rows
+    tableBody.innerHTML = '';
+    
+    if (reports.length === 0) {
+        // Show "no results" message
+        const noResultsRow = document.createElement('tr');
+        noResultsRow.innerHTML = `
+            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                <div class="flex flex-col items-center">
+                    <i class="ri-search-line text-4xl mb-2 text-gray-300"></i>
+                    <p class="text-lg font-medium">No reports found</p>
+                    <p class="text-sm">Try adjusting your filters to see more results</p>
+                </div>
+            </td>
+        `;
+        tableBody.appendChild(noResultsRow);
+        return;
+    }
+    
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * reportsPerPage;
+    const endIndex = startIndex + reportsPerPage;
+    const reportsToShow = reports.slice(startIndex, endIndex);
+    
+    reportsToShow.forEach(report => {
+        const row = createTableRow(report);
+        tableBody.appendChild(row);
+    });
+}
+
+// Update pagination controls and information
+function updatePagination() {
+    const totalResults = filteredReports.length;
+    
+    // Update pagination info
+    updatePaginationInfo(totalResults);
+    
+    // Update pagination controls
+    updatePaginationControls();
+}
+
+// Update pagination information
+function updatePaginationInfo(totalResults) {
+    const paginationInfo = document.getElementById('pagination-info');
+    
+    if (paginationInfo) {
+        const startIndex = (currentPage - 1) * reportsPerPage + 1;
+        const endIndex = Math.min(currentPage * reportsPerPage, totalResults);
+        
+        paginationInfo.innerHTML = `
+            Showing <span class="font-medium">${totalResults > 0 ? startIndex : 0}</span> to <span class="font-medium">${endIndex}</span> of <span class="font-medium">${totalResults}</span> results
+        `;
+    }
+}
+
+// Update pagination controls
+function updatePaginationControls() {
+    const paginationNav = document.querySelector('#dashboard nav[aria-label="Pagination"]');
+    
+    if (!paginationNav) return;
+    
+    // Clear existing pagination
+    paginationNav.innerHTML = '';
+    
+    if (totalPages <= 1) {
+        // Hide pagination if only one page or no results
+        paginationNav.style.display = 'none';
+        return;
+    }
+    
+    paginationNav.style.display = 'inline-flex';
+    
+    // Page numbers only (no Previous/Next buttons)
+    const maxVisiblePages = 7;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    // Adjust start page if we're near the end
+    if (endPage - startPage < maxVisiblePages - 1) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    // First page + ellipsis if needed
+    if (startPage > 1) {
+        const firstPageButton = createPageButton(1);
+        firstPageButton.classList.add('rounded-l-md');
+        paginationNav.appendChild(firstPageButton);
+        
+        if (startPage > 2) {
+            const ellipsis = document.createElement('span');
+            ellipsis.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700';
+            ellipsis.textContent = '...';
+            paginationNav.appendChild(ellipsis);
+        }
+    }
+    
+    // Page number buttons
+    for (let i = startPage; i <= endPage; i++) {
+        const pageButton = createPageButton(i);
+        
+        // Add rounded corners to first and last buttons if no ellipsis
+        if (i === 1 && startPage === 1) {
+            pageButton.classList.add('rounded-l-md');
+        }
+        if (i === totalPages && endPage === totalPages) {
+            pageButton.classList.add('rounded-r-md');
+        }
+        
+        paginationNav.appendChild(pageButton);
+    }
+    
+    // Ellipsis + last page if needed
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement('span');
+            ellipsis.className = 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700';
+            ellipsis.textContent = '...';
+            paginationNav.appendChild(ellipsis);
+        }
+        
+        const lastPageButton = createPageButton(totalPages);
+        lastPageButton.classList.add('rounded-r-md');
+        paginationNav.appendChild(lastPageButton);
+    }
+}
+
+// Update mobile pagination controls
+function updateMobilePagination() {
+    const mobilePrevBtn = document.getElementById('mobile-prev-btn');
+    const mobileNextBtn = document.getElementById('mobile-next-btn');
+    const mobilePagination = document.getElementById('mobile-pagination');
+    
+    if (!mobilePagination) return;
+    
+    if (totalPages <= 1) {
+        // Hide mobile pagination if only one page or no results
+        mobilePagination.style.display = 'none';
+        return;
+    }
+    
+    mobilePagination.style.display = 'flex';
+    
+    if (mobilePrevBtn) {
+        mobilePrevBtn.disabled = currentPage === 1;
+        mobilePrevBtn.className = `relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentPage === 1 ? 'cursor-not-allowed opacity-50' : ''}`;
+    }
+    
+    if (mobileNextBtn) {
+        mobileNextBtn.disabled = currentPage === totalPages;
+        mobileNextBtn.className = `ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 ${currentPage === totalPages ? 'cursor-not-allowed opacity-50' : ''}`;
+    }
+}
+
+// Create a page button
+function createPageButton(pageNumber) {
+    const button = document.createElement('button');
+    const isCurrentPage = pageNumber === currentPage;
+    
+    button.className = `relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${
+        isCurrentPage 
+            ? 'bg-primary text-white hover:bg-primary-dark' 
+            : 'bg-white text-gray-700 hover:bg-gray-50'
+    }`;
+    button.textContent = pageNumber;
+    button.onclick = () => goToPage(pageNumber);
+    
+    return button;
+}
+
+// Navigate to a specific page
+function goToPage(pageNumber) {
+    if (pageNumber < 1 || pageNumber > totalPages || pageNumber === currentPage) {
+        return;
+    }
+    
+    currentPage = pageNumber;
+    updateDashboardTable(filteredReports);
+    updatePagination();
+    
+    console.log(`Navigated to page ${currentPage} of ${totalPages}`);
+}
+
+// Export filtered data (placeholder functions)
+window.exportToExcel = function() {
+    console.log('Exporting filtered data to Excel:', filteredReports.length, 'reports');
+    alert(`Exporting ${filteredReports.length} filtered reports to Excel...`);
+    // TODO: Implement actual Excel export functionality
 };
-pieChart.setOption(pieOption);
-// Resize charts when window size changes
-window.addEventListener('resize', function() {
-barChart.resize();
-pieChart.resize();
-});
-});
+
+window.exportToPDF = function() {
+    console.log('Exporting filtered data to PDF:', filteredReports.length, 'reports');
+    alert(`Exporting ${filteredReports.length} filtered reports to PDF...`);
+    // TODO: Implement actual PDF export functionality
+};
 </script>
 </body>
 </html>
