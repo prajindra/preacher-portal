@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com/3.4.16"></script>
     <script>tailwind.config={theme:{extend:{colors:{primary:'#FF9933',secondary:'#FFD700'}}}}</script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script type="module" src="./firebase-config.js"></script>
+    <script type="module" src="./firebase-data.js"></script>
     <style>
         .gallery-item {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -88,7 +90,7 @@
 
                 <!-- Mission Gallery Grid -->
                 <div id="mission-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                    <!-- Sample mission images will be loaded here -->
+                    <!-- Mission images will be loaded here -->
                 </div>
 
                 <!-- Mission Pagination -->
@@ -118,7 +120,7 @@
 
                 <!-- Activities Gallery Grid -->
                 <div id="activities-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                    <!-- Sample activities images will be loaded here -->
+                    <!-- Activities images will be loaded here -->
                 </div>
 
                 <!-- Activities Pagination -->
@@ -160,48 +162,178 @@
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import { auth } from './firebase-config.js';
+        import { 
+            uploadGalleryImage, 
+            fetchGalleryImages, 
+            deleteGalleryImage, 
+            listenToGalleryImages 
+        } from './firebase-data.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+
         class ImageGallery {
             constructor() {
                 this.currentTab = 'mission';
                 this.currentPage = { mission: 1, activities: 1 };
                 this.imagesPerPage = 6;
                 this.images = {
-                    mission: [
-                        { id: 1, src: 'https://readdy.ai/api/search-image?query=ISKCON%20temple%20mission%20spiritual%20activities%20devotees%20worship%20ceremony&width=400&height=300&seq=1', title: 'Temple Worship', date: '2025-01-15' },
-                        { id: 2, src: 'https://readdy.ai/api/search-image?query=Krishna%20consciousness%20mission%20spiritual%20education%20teaching%20philosophy&width=400&height=300&seq=2', title: 'Spiritual Education', date: '2025-01-14' },
-                        { id: 3, src: 'https://readdy.ai/api/search-image?query=ISKCON%20community%20service%20helping%20people%20charity%20work%20mission&width=400&height=300&seq=3', title: 'Community Service', date: '2025-01-13' },
-                        { id: 4, src: 'https://readdy.ai/api/search-image?query=Vedic%20culture%20preservation%20traditional%20arts%20mission%20heritage&width=400&height=300&seq=4', title: 'Cultural Preservation', date: '2025-01-12' },
-                        { id: 5, src: 'https://readdy.ai/api/search-image?query=ISKCON%20youth%20programs%20spiritual%20development%20mission%20activities&width=400&height=300&seq=5', title: 'Youth Programs', date: '2025-01-11' },
-                        { id: 6, src: 'https://readdy.ai/api/search-image?query=Krishna%20temple%20mission%20meditation%20spiritual%20practice%20devotion&width=400&height=300&seq=6', title: 'Meditation Programs', date: '2025-01-10' },
-                        { id: 7, src: 'https://readdy.ai/api/search-image?query=ISKCON%20mission%20outreach%20spreading%20awareness%20spiritual%20knowledge&width=400&height=300&seq=7', title: 'Outreach Programs', date: '2025-01-09' },
-                        { id: 8, src: 'https://readdy.ai/api/search-image?query=Temple%20mission%20volunteer%20service%20community%20engagement%20helping&width=400&height=300&seq=8', title: 'Volunteer Service', date: '2025-01-08' }
-                    ],
-                    activities: [
-                        { id: 1, src: 'https://readdy.ai/api/search-image?query=Hare%20Krishna%20book%20distribution%20preaching%20activities%20devotees%20sharing&width=400&height=300&seq=9', title: 'Book Distribution', date: '2025-01-20' },
-                        { id: 2, src: 'https://readdy.ai/api/search-image?query=Kirtan%20singing%20Hare%20Krishna%20preaching%20activities%20musical%20instruments&width=400&height=300&seq=10', title: 'Kirtan Performance', date: '2025-01-19' },
-                        { id: 3, src: 'https://readdy.ai/api/search-image?query=Prasadam%20distribution%20food%20sharing%20preaching%20activities%20community&width=400&height=300&seq=11', title: 'Prasadam Distribution', date: '2025-01-18' },
-                        { id: 4, src: 'https://readdy.ai/api/search-image?query=University%20preaching%20students%20spiritual%20education%20campus%20activities&width=400&height=300&seq=12', title: 'University Preaching', date: '2025-01-17' },
-                        { id: 5, src: 'https://readdy.ai/api/search-image?query=Street%20preaching%20Hare%20Krishna%20public%20activities%20devotees%20sharing&width=400&height=300&seq=13', title: 'Street Preaching', date: '2025-01-16' },
-                        { id: 6, src: 'https://readdy.ai/api/search-image?query=Festival%20preaching%20Ratha%20Yatra%20celebration%20activities%20colorful&width=400&height=300&seq=14', title: 'Festival Preaching', date: '2025-01-15' },
-                        { id: 7, src: 'https://readdy.ai/api/search-image?query=Home%20programs%20preaching%20activities%20family%20spiritual%20gathering&width=400&height=300&seq=15', title: 'Home Programs', date: '2025-01-14' },
-                        { id: 8, src: 'https://readdy.ai/api/search-image?query=Corporate%20preaching%20office%20spiritual%20programs%20workplace%20activities&width=400&height=300&seq=16', title: 'Corporate Programs', date: '2025-01-13' },
-                        { id: 9, src: 'https://readdy.ai/api/search-image?query=Hospital%20preaching%20spiritual%20care%20healing%20activities%20compassion&width=400&height=300&seq=17', title: 'Hospital Visits', date: '2025-01-12' },
-                        { id: 10, src: 'https://readdy.ai/api/search-image?query=Prison%20preaching%20rehabilitation%20spiritual%20guidance%20activities%20hope&width=400&height=300&seq=18', title: 'Prison Programs', date: '2025-01-11' },
-                        { id: 11, src: 'https://readdy.ai/api/search-image?query=Children%20preaching%20activities%20spiritual%20education%20kids%20learning&width=400&height=300&seq=19', title: 'Children Programs', date: '2025-01-10' },
-                        { id: 12, src: 'https://readdy.ai/api/search-image?query=Senior%20citizens%20preaching%20elderly%20spiritual%20care%20activities&width=400&height=300&seq=20', title: 'Senior Programs', date: '2025-01-09' }
-                    ]
+                    mission: [],
+                    activities: []
                 };
                 this.currentImages = [];
                 this.currentImageIndex = 0;
                 this.imageToDelete = null;
+                this.currentUser = null;
+                this.unsubscribers = {};
                 
                 this.init();
             }
 
-            init() {
+            async init() {
                 this.setupEventListeners();
+                this.setupAuthListener();
+                await this.loadImagesFromDatabase();
                 this.switchTab('mission');
+            }
+
+            setupAuthListener() {
+                onAuthStateChanged(auth, (user) => {
+                    this.currentUser = user;
+                    this.updateUploadAreas();
+                });
+            }
+
+            updateUploadAreas() {
+                const uploadAreas = document.querySelectorAll('.upload-area');
+                uploadAreas.forEach(area => {
+                    const button = area.querySelector('button');
+                    const text = area.querySelector('p');
+                    
+                    if (!this.currentUser) {
+                        button.textContent = 'Login to Upload';
+                        button.onclick = () => this.showLoginRequired();
+                        text.textContent = 'Please login to upload images';
+                    } else {
+                        button.textContent = 'Choose Files';
+                        button.onclick = null; // Will be set up in setupFileUpload
+                        text.textContent = 'Drag and drop images here or';
+                    }
+                });
+            }
+
+            showLoginRequired() {
+                alert('Please login to upload images to the gallery.');
+            }
+
+            async loadImagesFromDatabase() {
+                try {
+                    console.log('=== LOADING IMAGES FROM DATABASE ===');
+                    
+                    // Load mission images
+                    console.log('Loading mission images...');
+                    const missionImages = await fetchGalleryImages('mission');
+                    console.log('Mission images loaded:', missionImages.length, missionImages);
+                    
+                    this.images.mission = missionImages.map(img => ({
+                        id: img.id,
+                        src: img.url,
+                        title: img.title,
+                        date: img.date,
+                        filename: img.filename,
+                        isFromDatabase: true
+                    }));
+
+                    // Load activities images
+                    console.log('Loading activities images...');
+                    const activitiesImages = await fetchGalleryImages('activities');
+                    console.log('Activities images loaded:', activitiesImages.length, activitiesImages);
+                    
+                    this.images.activities = activitiesImages.map(img => ({
+                        id: img.id,
+                        src: img.url,
+                        title: img.title,
+                        date: img.date,
+                        filename: img.filename,
+                        isFromDatabase: true
+                    }));
+
+                    console.log('Final images object:', {
+                        mission: this.images.mission.length,
+                        activities: this.images.activities.length
+                    });
+
+                    // Force render the gallery immediately
+                    this.renderGallery();
+
+                    // Set up real-time listeners after initial render
+                    this.setupRealtimeListeners();
+
+                    console.log('=== DATABASE LOADING COMPLETE ===');
+                } catch (error) {
+                    console.error('Error loading images from database:', error);
+                    this.renderGallery(); // Render with empty arrays
+                }
+            }
+
+            setupRealtimeListeners() {
+                // Listen for mission images
+                this.unsubscribers.mission = listenToGalleryImages('mission', (images) => {
+                    console.log('Real-time update received for mission images:', images.length);
+                    this.images.mission = images.map(img => ({
+                        id: img.id,
+                        src: img.url,
+                        title: img.title,
+                        date: img.date,
+                        filename: img.filename,
+                        isFromDatabase: true
+                    }));
+                    console.log('Mission images updated:', this.images.mission.length);
+                    if (this.currentTab === 'mission') {
+                        console.log('Rendering mission gallery after real-time update');
+                        this.renderGallery();
+                    }
+                });
+
+                // Listen for activities images
+                this.unsubscribers.activities = listenToGalleryImages('activities', (images) => {
+                    console.log('Real-time update received for activities images:', images.length);
+                    this.images.activities = images.map(img => ({
+                        id: img.id,
+                        src: img.url,
+                        title: img.title,
+                        date: img.date,
+                        filename: img.filename,
+                        isFromDatabase: true
+                    }));
+                    console.log('Activities images updated:', this.images.activities.length);
+                    if (this.currentTab === 'activities') {
+                        console.log('Rendering activities gallery after real-time update');
+                        this.renderGallery();
+                    }
+                });
+
+                // Fallback: Refresh images every 5 seconds if real-time fails
+                this.refreshInterval = setInterval(async () => {
+                    try {
+                        console.log('Fallback refresh: Checking for new images...');
+                        const currentImages = await fetchGalleryImages(this.currentTab);
+                        if (currentImages.length !== this.images[this.currentTab].length) {
+                            console.log(`Image count changed for ${this.currentTab}: ${this.images[this.currentTab].length} -> ${currentImages.length}`);
+                            this.images[this.currentTab] = currentImages.map(img => ({
+                                id: img.id,
+                                src: img.url,
+                                title: img.title,
+                                date: img.date,
+                                filename: img.filename,
+                                isFromDatabase: true
+                            }));
+                            this.renderGallery();
+                        }
+                    } catch (error) {
+                        console.error('Fallback refresh failed:', error);
+                    }
+                }, 5000);
             }
 
             setupEventListeners() {
@@ -248,14 +380,22 @@
                 const fileInput = document.getElementById(`${type}-file-input`);
                 const button = uploadArea.querySelector('button');
 
-                button.addEventListener('click', () => fileInput.click());
+                button.addEventListener('click', () => {
+                    if (!this.currentUser) {
+                        this.showLoginRequired();
+                        return;
+                    }
+                    fileInput.click();
+                });
 
                 fileInput.addEventListener('change', (e) => this.handleFileSelect(e, type));
 
                 // Drag and drop
                 uploadArea.addEventListener('dragover', (e) => {
                     e.preventDefault();
-                    uploadArea.classList.add('dragover');
+                    if (this.currentUser) {
+                        uploadArea.classList.add('dragover');
+                    }
                 });
 
                 uploadArea.addEventListener('dragleave', () => {
@@ -265,31 +405,107 @@
                 uploadArea.addEventListener('drop', (e) => {
                     e.preventDefault();
                     uploadArea.classList.remove('dragover');
+                    if (!this.currentUser) {
+                        this.showLoginRequired();
+                        return;
+                    }
                     this.handleFileSelect({ target: { files: e.dataTransfer.files } }, type);
                 });
             }
 
-            handleFileSelect(event, type) {
+            async handleFileSelect(event, type) {
+                if (!this.currentUser) {
+                    this.showLoginRequired();
+                    return;
+                }
+
                 const files = Array.from(event.target.files);
                 
-                files.forEach(file => {
+                for (const file of files) {
                     if (file.type.startsWith('image/') && file.size <= 5 * 1024 * 1024) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const newImage = {
-                                id: Date.now() + Math.random(),
-                                src: e.target.result,
-                                title: file.name.replace(/\.[^/.]+$/, ""),
-                                date: new Date().toISOString().split('T')[0]
-                            };
-                            this.images[type].unshift(newImage);
-                            this.renderGallery();
-                        };
-                        reader.readAsDataURL(file);
+                        try {
+                            this.showUploadProgress(file.name);
+                            
+                            // Upload to Firebase
+                            const uploadedImage = await uploadGalleryImage(
+                                file, 
+                                type, 
+                                file.name.replace(/\.[^/.]+$/, ""), 
+                                this.currentUser.uid
+                            );
+                            
+                            this.hideUploadProgress();
+                            this.showSuccessMessage(`Image "${file.name}" uploaded successfully!`);
+                            
+                            console.log('Image uploaded successfully:', uploadedImage);
+                        } catch (error) {
+                            console.error('Error uploading image:', error);
+                            this.hideUploadProgress();
+                            this.showErrorMessage(`Failed to upload "${file.name}". Please try again.`);
+                        }
                     } else {
-                        alert('Please select valid image files under 5MB.');
+                        this.showErrorMessage('Please select valid image files under 5MB.');
                     }
-                });
+                }
+                
+                // Clear the file input
+                event.target.value = '';
+            }
+
+            showUploadProgress(filename) {
+                const progressDiv = document.createElement('div');
+                progressDiv.id = 'upload-progress';
+                progressDiv.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                progressDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-3"></div>
+                        <span>Uploading "${filename}"...</span>
+                    </div>
+                `;
+                document.body.appendChild(progressDiv);
+            }
+
+            hideUploadProgress() {
+                const progressDiv = document.getElementById('upload-progress');
+                if (progressDiv) {
+                    document.body.removeChild(progressDiv);
+                }
+            }
+
+            showSuccessMessage(message) {
+                const successDiv = document.createElement('div');
+                successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                successDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="ri-check-line mr-2"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                document.body.appendChild(successDiv);
+                
+                setTimeout(() => {
+                    if (document.body.contains(successDiv)) {
+                        document.body.removeChild(successDiv);
+                    }
+                }, 3000);
+            }
+
+            showErrorMessage(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                errorDiv.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="ri-error-warning-line mr-2"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                document.body.appendChild(errorDiv);
+                
+                setTimeout(() => {
+                    if (document.body.contains(errorDiv)) {
+                        document.body.removeChild(errorDiv);
+                    }
+                }, 5000);
             }
 
             switchTab(tab) {
@@ -321,17 +537,33 @@
                 const endIndex = startIndex + this.imagesPerPage;
                 const pageImages = images.slice(startIndex, endIndex);
                 
+                // Show loading state if no images
+                if (images.length === 0) {
+                    gallery.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <i class="ri-image-line text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">No images uploaded yet</p>
+                            <p class="text-gray-400 text-sm">Upload some images to get started!</p>
+                        </div>
+                    `;
+                    pagination.innerHTML = '';
+                    return;
+                }
+                
                 // Render images
                 gallery.innerHTML = pageImages.map((image, index) => `
                     <div class="gallery-item bg-white rounded-lg shadow-md overflow-hidden">
                         <div class="relative">
                             <img src="${image.src}" alt="${image.title}" 
                                  class="w-full h-48 object-cover cursor-pointer"
-                                 onclick="gallery.openModal(${startIndex + index})">
-                            <button class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition"
-                                    onclick="gallery.confirmDelete(${image.id})">
-                                <i class="ri-delete-bin-line text-sm"></i>
-                            </button>
+                                 onclick="gallery.openModal(${startIndex + index})"
+                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-48 bg-gray-200 flex items-center justify-center\\'>Image Not Available</div>'">
+                            ${this.currentUser ? `
+                                <button class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition"
+                                        onclick="gallery.confirmDelete('${image.id}', '${image.filename || ''}', ${image.isFromDatabase || false})">
+                                    <i class="ri-delete-bin-line text-sm"></i>
+                                </button>
+                            ` : ''}
                         </div>
                         <div class="p-4">
                             <h3 class="font-semibold text-gray-800 mb-1">${image.title}</h3>
@@ -420,8 +652,8 @@
                 document.getElementById('image-modal').classList.add('hidden');
             }
 
-            confirmDelete(imageId) {
-                this.imageToDelete = imageId;
+            confirmDelete(imageId, filename, isFromDatabase) {
+                this.imageToDelete = { id: imageId, filename: filename, isFromDatabase: isFromDatabase };
                 document.getElementById('delete-modal').classList.remove('hidden');
             }
 
@@ -430,12 +662,25 @@
                 this.imageToDelete = null;
             }
 
-            deleteImage() {
+            async deleteImage() {
                 if (this.imageToDelete) {
-                    this.images[this.currentTab] = this.images[this.currentTab].filter(
-                        img => img.id !== this.imageToDelete
-                    );
-                    this.renderGallery();
+                    try {
+                        if (this.imageToDelete.isFromDatabase) {
+                            // Delete from Firebase
+                            await deleteGalleryImage(this.imageToDelete.id, this.imageToDelete.filename);
+                            this.showSuccessMessage('Image deleted successfully!');
+                        } else {
+                            // Delete from local array (for non-database images)
+                            this.images[this.currentTab] = this.images[this.currentTab].filter(
+                                img => img.id !== this.imageToDelete.id
+                            );
+                            this.renderGallery();
+                        }
+                    } catch (error) {
+                        console.error('Error deleting image:', error);
+                        this.showErrorMessage('Failed to delete image. Please try again.');
+                    }
+                    
                     this.closeDeleteModal();
                 }
             }
@@ -443,6 +688,9 @@
 
         // Initialize gallery
         const gallery = new ImageGallery();
+        
+        // Make gallery available globally for onclick handlers
+        window.gallery = gallery;
     </script>
 </body>
 </html>

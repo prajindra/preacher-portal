@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection - for role checking
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Activity reports collection (your existing functionality)
+    match /activityReports/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+      allow delete: if request.auth != null;
+    }
+    
+    // Preaching categories collection (your existing functionality)
+    match /preachingCategories/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Gallery images collection
+    match /galleryImages/{document} {
+      allow read: if true; // Public read for homepage display
+      allow write: if request.auth != null; // Auth required for upload
+      allow delete: if request.auth != null; // Auth required for delete
+    }
+    
+    // CRITICAL: Preaching resources collection - THIS IS WHAT'S MISSING
+    match /preachingResources/{document} {
+      allow read: if true; // Public read for downloads
+      allow write: if request.auth != null; // Auth required for upload
+      allow delete: if request.auth != null; // Auth required for delete
+    }
+    
+    // Default rule for any other collections
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

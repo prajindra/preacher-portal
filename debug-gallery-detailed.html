@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery Debug Tool - ISKCON Malaysia</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#FF9933',secondary:'#FFD700'}}}}</script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script type="module" src="./firebase-config.js"></script>
+    <script type="module" src="./firebase-data.js"></script>
+    <style>
+        .debug-section {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .success { border-color: #10b981; background-color: #f0fdf4; }
+        .error { border-color: #ef4444; background-color: #fef2f2; }
+        .warning { border-color: #f59e0b; background-color: #fffbeb; }
+        .info { border-color: #3b82f6; background-color: #eff6ff; }
+        
+        .log-entry {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        .log-error { background-color: #fee; color: #c53030; }
+        .log-success { background-color: #efe; color: #2d7d32; }
+        .log-info { background-color: #e3f2fd; color: #1565c0; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="index.html" class="flex items-center">
+                        <img src="https://static.readdy.ai/image/6d35e524e60a5d85af4995c2d7119a74/37e6fbb3fe70a3e3ab4660003eaf1b2a.webp" alt="ISKCON Logo" class="h-8 mr-3">
+                        <span class="text-2xl font-bold text-primary">Gallery Debug Tool</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="gallery.html" class="text-gray-600 hover:text-primary transition-colors">
+                        <i class="ri-gallery-line mr-1"></i> Gallery
+                    </a>
+                    <a href="index.html" class="text-gray-600 hover:text-primary transition-colors">
+                        <i class="ri-home-line mr-1"></i> Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h1 class="text-3xl font-bold mb-4 text-gray-800">Gallery Debug Tool</h1>
+            <p class="text-gray-600 mb-6">This tool helps diagnose issues with image uploads and display in the gallery system.</p>
+            
+            <!-- Authentication Status -->
+            <div id="auth-status" class="debug-section info">
+                <h3 class="text-lg font-semibold mb-2">Authentication Status</h3>
+                <div id="auth-info">Checking authentication...</div>
+            </div>
+
+            <!-- Database Connection Test -->
+            <div id="db-status" class="debug-section">
+                <h3 class="text-lg font-semibold mb-2">Database Connection Test</h3>
+                <button id="test-db-btn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-2">
+                    Test Database Connection
+                </button>
+                <div id="db-info">Click button to test database connection</div>
+            </div>
+
+            <!-- Gallery Images Analysis -->
+            <div id="gallery-analysis" class="debug-section">
+                <h3 class="text-lg font-semibold mb-2">Gallery Images Analysis</h3>
+                <button id="analyze-gallery-btn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-2">
+                    Analyze Gallery Images
+                </button>
+                <div id="gallery-info">Click button to analyze gallery images</div>
+            </div>
+
+            <!-- Test Upload -->
+            <div id="test-upload" class="debug-section">
+                <h3 class="text-lg font-semibold mb-2">Test Image Upload</h3>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Category:</label>
+                    <select id="test-category" class="border border-gray-300 rounded px-3 py-2 mr-4">
+                        <option value="mission">Mission Images</option>
+                        <option value="activities">Preaching Activities</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Test Image:</label>
+                    <input type="file" id="test-file" accept="image/*" class="border border-gray-300 rounded px-3 py-2">
+                </div>
+                <button id="test-upload-btn" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 mb-2">
+                    Test Upload
+                </button>
+                <div id="upload-info">Select a file and click to test upload</div>
+            </div>
+
+            <!-- Real-time Listener Test -->
+            <div id="listener-test" class="debug-section">
+                <h3 class="text-lg font-semibold mb-2">Real-time Listener Test</h3>
+                <button id="start-listener-btn" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 mb-2 mr-2">
+                    Start Listeners
+                </button>
+                <button id="stop-listener-btn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mb-2">
+                    Stop Listeners
+                </button>
+                <div id="listener-info">Click to start/stop real-time listeners</div>
+            </div>
+
+            <!-- Debug Log -->
+            <div id="debug-log" class="debug-section">
+                <h3 class="text-lg font-semibold mb-2">Debug Log</h3>
+                <button id="clear-log-btn" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mb-2">
+                    Clear Log
+                </button>
+                <div id="log-container" class="max-h-96 overflow-y-auto border border-gray-300 rounded p-4 bg-gray-50">
+                    <div class="log-entry log-info">Debug tool initialized</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth } from './firebase-config.js';
+        import { 
+            fetchGalleryImages, 
+            debugGalleryImages, 
+            uploadGalleryImage, 
+            listenToGalleryImages 
+        } from './firebase-data.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+
+        class GalleryDebugTool {
+            constructor() {
+                this.currentUser = null;
+                this.listeners = {};
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.setupAuthListener();
+                this.log('Debug tool initialized', 'info');
+            }
+
+            setupAuthListener() {
+                onAuthStateChanged(auth, (user) => {
+                    this.currentUser = user;
+                    this.updateAuthStatus();
+                });
+            }
+
+            updateAuthStatus() {
+                const authInfo = document.getElementById('auth-info');
+                const authStatus = document.getElementById('auth-status');
+                
+                if (this.currentUser) {
+                    authInfo.innerHTML = `
+                        <div class="text-green-700">
+                            <i class="ri-check-line mr-2"></i>
+                            <strong>Authenticated</strong><br>
+                            User: ${this.currentUser.email}<br>
+                            UID: ${this.currentUser.uid}
+                        </div>
+                    `;
+                    authStatus.className = 'debug-section success';
+                    this.log(`User authenticated: ${this.currentUser.email}`, 'success');
+                } else {
+                    authInfo.innerHTML = `
+                        <div class="text-red-700">
+                            <i class="ri-close-line mr-2"></i>
+                            <strong>Not Authenticated</strong><br>
+                            Please login to test upload functionality
+                        </div>
+                    `;
+                    authStatus.className = 'debug-section error';
+                    this.log('User not authenticated', 'error');
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('test-db-btn').addEventListener('click', () => this.testDatabaseConnection());
+                document.getElementById('analyze-gallery-btn').addEventListener('click', () => this.analyzeGallery());
+                document.getElementById('test-upload-btn').addEventListener('click', () => this.testUpload());
+                document.getElementById('start-listener-btn').addEventListener('click', () => this.startListeners());
+                document.getElementById('stop-listener-btn').addEventListener('click', () => this.stopListeners());
+                document.getElementById('clear-log-btn').addEventListener('click', () => this.clearLog());
+            }
+
+            async testDatabaseConnection() {
+                const dbInfo = document.getElementById('db-info');
+                const dbStatus = document.getElementById('db-status');
+                
+                this.log('Testing database connection...', 'info');
+                dbInfo.innerHTML = '<div class="text-blue-600">Testing database connection...</div>';
+                dbStatus.className = 'debug-section info';
+                
+                try {
+                    // Test basic fetch
+                    const missionImages = await fetchGalleryImages('mission');
+                    const activitiesImages = await fetchGalleryImages('activities');
+                    
+                    dbInfo.innerHTML = `
+                        <div class="text-green-700">
+                            <i class="ri-check-line mr-2"></i>
+                            <strong>Database Connection: SUCCESS</strong><br>
+                            Mission images found: ${missionImages.length}<br>
+                            Activities images found: ${activitiesImages.length}
+                        </div>
+                    `;
+                    dbStatus.className = 'debug-section success';
+                    this.log(`Database connection successful. Mission: ${missionImages.length}, Activities: ${activitiesImages.length}`, 'success');
+                } catch (error) {
+                    dbInfo.innerHTML = `
+                        <div class="text-red-700">
+                            <i class="ri-close-line mr-2"></i>
+                            <strong>Database Connection: FAILED</strong><br>
+                            Error: ${error.message}
+                        </div>
+                    `;
+                    dbStatus.className = 'debug-section error';
+                    this.log(`Database connection failed: ${error.message}`, 'error');
+                }
+            }
+
+            async analyzeGallery() {
+                const galleryInfo = document.getElementById('gallery-info');
+                const galleryStatus = document.getElementById('gallery-analysis');
+                
+                this.log('Analyzing gallery images...', 'info');
+                galleryInfo.innerHTML = '<div class="text-blue-600">Analyzing gallery images...</div>';
+                galleryStatus.className = 'debug-section info';
+                
+                try {
+                    const debugData = await debugGalleryImages();
+                    
+                    let analysisHtml = '<div class="text-green-700"><i class="ri-check-line mr-2"></i><strong>Gallery Analysis Complete</strong></div>';
+                    
+                    if (Object.keys(debugData).length === 0) {
+                        analysisHtml += '<div class="mt-2 text-red-600">⚠️ No images found in database</div>';
+                        this.log('No images found in database', 'error');
+                    } else {
+                        analysisHtml += '<div class="mt-2"><strong>Images by Category:</strong></div>';
+                        for (const [category, images] of Object.entries(debugData)) {
+                            analysisHtml += `<div class="ml-4">• ${category}: ${images.length} images</div>`;
+                            this.log(`Category '${category}': ${images.length} images`, 'info');
+                            
+                            // Show first few images for each category
+                            if (images.length > 0) {
+                                analysisHtml += '<div class="ml-8 text-sm text-gray-600">';
+                                images.slice(0, 3).forEach(img => {
+                                    analysisHtml += `<div>- ${img.title} (${img.filename})</div>`;
+                                });
+                                if (images.length > 3) {
+                                    analysisHtml += `<div>... and ${images.length - 3} more</div>`;
+                                }
+                                analysisHtml += '</div>';
+                            }
+                        }
+                    }
+                    
+                    galleryInfo.innerHTML = analysisHtml;
+                    galleryStatus.className = 'debug-section success';
+                } catch (error) {
+                    galleryInfo.innerHTML = `
+                        <div class="text-red-700">
+                            <i class="ri-close-line mr-2"></i>
+                            <strong>Gallery Analysis: FAILED</strong><br>
+                            Error: ${error.message}
+                        </div>
+                    `;
+                    galleryStatus.className = 'debug-section error';
+                    this.log(`Gallery analysis failed: ${error.message}`, 'error');
+                }
+            }
+
+            async testUpload() {
+                if (!this.currentUser) {
+                    this.log('Cannot test upload: User not authenticated', 'error');
+                    alert('Please login first to test upload functionality');
+                    return;
+                }
+
+                const fileInput = document.getElementById('test-file');
+                const categorySelect = document.getElementById('test-category');
+                const uploadInfo = document.getElementById('upload-info');
+                const uploadStatus = document.getElementById('test-upload');
+                
+                if (!fileInput.files[0]) {
+                    this.log('Cannot test upload: No file selected', 'error');
+                    alert('Please select a file first');
+                    return;
+                }
+
+                const file = fileInput.files[0];
+                const category = categorySelect.value;
+                
+                this.log(`Starting test upload: ${file.name} to category '${category}'`, 'info');
+                uploadInfo.innerHTML = '<div class="text-blue-600">Uploading test image...</div>';
+                uploadStatus.className = 'debug-section info';
+                
+                try {
+                    const result = await uploadGalleryImage(
+                        file, 
+                        category, 
+                        `Test Upload - ${file.name}`, 
+                        this.currentUser.uid
+                    );
+                    
+                    uploadInfo.innerHTML = `
+                        <div class="text-green-700">
+                            <i class="ri-check-line mr-2"></i>
+                            <strong>Upload: SUCCESS</strong><br>
+                            Image ID: ${result.id}<br>
+                            Category: ${result.category}<br>
+                            URL: <a href="${result.url}" target="_blank" class="text-blue-600 underline">View Image</a>
+                        </div>
+                    `;
+                    uploadStatus.className = 'debug-section success';
+                    this.log(`Upload successful: ${result.id} in category '${result.category}'`, 'success');
+                    
+                    // Clear the file input
+                    fileInput.value = '';
+                } catch (error) {
+                    uploadInfo.innerHTML = `
+                        <div class="text-red-700">
+                            <i class="ri-close-line mr-2"></i>
+                            <strong>Upload: FAILED</strong><br>
+                            Error: ${error.message}
+                        </div>
+                    `;
+                    uploadStatus.className = 'debug-section error';
+                    this.log(`Upload failed: ${error.message}`, 'error');
+                }
+            }
+
+            startListeners() {
+                this.log('Starting real-time listeners...', 'info');
+                
+                // Listen to mission images
+                this.listeners.mission = listenToGalleryImages('mission', (images) => {
+                    this.log(`Real-time update: Mission images - ${images.length} found`, 'info');
+                });
+                
+                // Listen to activities images
+                this.listeners.activities = listenToGalleryImages('activities', (images) => {
+                    this.log(`Real-time update: Activities images - ${images.length} found`, 'info');
+                });
+                
+                const listenerInfo = document.getElementById('listener-info');
+                const listenerStatus = document.getElementById('listener-test');
+                
+                listenerInfo.innerHTML = `
+                    <div class="text-green-700">
+                        <i class="ri-check-line mr-2"></i>
+                        <strong>Real-time Listeners: ACTIVE</strong><br>
+                        Listening for changes in both mission and activities categories
+                    </div>
+                `;
+                listenerStatus.className = 'debug-section success';
+                this.log('Real-time listeners started successfully', 'success');
+            }
+
+            stopListeners() {
+                this.log('Stopping real-time listeners...', 'info');
+                
+                // Unsubscribe from listeners
+                if (this.listeners.mission) {
+                    this.listeners.mission();
+                    delete this.listeners.mission;
+                }
+                if (this.listeners.activities) {
+                    this.listeners.activities();
+                    delete this.listeners.activities;
+                }
+                
+                const listenerInfo = document.getElementById('listener-info');
+                const listenerStatus = document.getElementById('listener-test');
+                
+                listenerInfo.innerHTML = `
+                    <div class="text-gray-700">
+                        <i class="ri-stop-line mr-2"></i>
+                        <strong>Real-time Listeners: STOPPED</strong>
+                    </div>
+                `;
+                listenerStatus.className = 'debug-section';
+                this.log('Real-time listeners stopped', 'info');
+            }
+
+            log(message, type = 'info') {
+                const logContainer = document.getElementById('log-container');
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.className = `log-entry log-${type}`;
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                
+                logContainer.appendChild(logEntry);
+                logContainer.scrollTop = logContainer.scrollHeight;
+                
+                // Also log to console
+                console.log(`[Gallery Debug] ${message}`);
+            }
+
+            clearLog() {
+                const logContainer = document.getElementById('log-container');
+                logContainer.innerHTML = '<div class="log-entry log-info">Debug log cleared</div>';
+            }
+        }
+
+        // Initialize debug tool
+        const debugTool = new GalleryDebugTool();
+        
+        // Make it globally available for debugging
+        window.debugTool = debugTool;
+    </script>
+</body>
+</html>

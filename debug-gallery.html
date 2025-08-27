@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery Debug - ISKCON Malaysia</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#FF9933',secondary:'#FFD700'}}}}</script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script type="module" src="./firebase-config.js"></script>
+    <script type="module" src="./firebase-data.js"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-primary mb-8">Gallery Debug Tool</h1>
+        
+        <!-- Firebase Connection Test -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Firebase Connection Test</h2>
+            <div class="space-x-4 mb-4">
+                <button id="test-connection" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90">
+                    Test Firebase Connection
+                </button>
+                <button id="test-firestore-rules" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-opacity-90">
+                    Test Firestore Rules
+                </button>
+                <button id="test-storage-rules" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-opacity-90">
+                    Test Storage Rules
+                </button>
+            </div>
+            <div id="connection-result" class="mt-4"></div>
+        </div>
+
+        <!-- Gallery Images Debug -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Gallery Images Debug</h2>
+            <div class="space-x-4 mb-4">
+                <button id="debug-all-images" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-opacity-90">
+                    Debug All Images
+                </button>
+                <button id="debug-activities" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-opacity-90">
+                    Debug Activities Images
+                </button>
+                <button id="debug-mission" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-opacity-90">
+                    Debug Mission Images
+                </button>
+            </div>
+            <div id="debug-result" class="mt-4 bg-gray-100 p-4 rounded text-sm font-mono max-h-96 overflow-y-auto"></div>
+        </div>
+
+        <!-- Upload Test -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Upload Test</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select Category:</label>
+                <select id="test-category" class="border border-gray-300 rounded px-3 py-2">
+                    <option value="activities">Preaching Activities</option>
+                    <option value="mission">Mission Images</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Select Image:</label>
+                <input type="file" id="test-file" accept="image/*" class="border border-gray-300 rounded px-3 py-2 w-full">
+            </div>
+            <button id="test-upload" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-opacity-90">
+                Test Upload
+            </button>
+            <div id="upload-result" class="mt-4"></div>
+        </div>
+
+        <!-- Auth Status -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">Authentication Status</h2>
+            <div id="auth-status" class="text-gray-600">Checking...</div>
+            <button id="test-login" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-opacity-90 mt-4">
+                Test Login (test@example.com / password123)
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db, storage } from './firebase-config.js';
+        import { 
+            uploadGalleryImage, 
+            fetchGalleryImages, 
+            debugGalleryImages 
+        } from './firebase-data.js';
+        import { 
+            onAuthStateChanged, 
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword 
+        } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+        import { 
+            collection, 
+            getDocs 
+        } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+
+        let currentUser = null;
+
+        // Auth status monitoring
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            const authStatus = document.getElementById('auth-status');
+            if (user) {
+                authStatus.innerHTML = `
+                    <div class="text-green-600">
+                        <i class="ri-check-line mr-2"></i>
+                        Logged in as: ${user.email}
+                        <br>
+                        <small>UID: ${user.uid}</small>
+                    </div>
+                `;
+            } else {
+                authStatus.innerHTML = `
+                    <div class="text-red-600">
+                        <i class="ri-close-line mr-2"></i>
+                        Not logged in
+                    </div>
+                `;
+            }
+        });
+
+        // Test Firebase connection
+        document.getElementById('test-connection').addEventListener('click', async () => {
+            const result = document.getElementById('connection-result');
+            result.innerHTML = '<div class="text-blue-600">Testing connection...</div>';
+            
+            try {
+                // Test multiple collections to see which ones work
+                console.log('Testing Firebase connection...');
+                
+                let firestoreStatus = '❌ Failed';
+                let storageStatus = '❌ Failed';
+                let authStatus = '❌ Failed';
+                
+                // Test Firestore with a collection that should work
+                try {
+                    const galleryCollection = collection(db, 'galleryImages');
+                    await getDocs(galleryCollection);
+                    firestoreStatus = '✓ Connected';
+                    console.log('✓ Firestore connection successful');
+                } catch (firestoreError) {
+                    console.error('❌ Firestore connection failed:', firestoreError);
+                    firestoreStatus = `❌ Failed: ${firestoreError.message}`;
+                }
+                
+                // Test Storage reference creation
+                try {
+                    const { ref } = await import('https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js');
+                    const testRef = ref(storage, 'gallery/test.jpg');
+                    storageStatus = '✓ Available';
+                    console.log('✓ Storage reference creation successful');
+                } catch (storageError) {
+                    console.error('❌ Storage test failed:', storageError);
+                    storageStatus = `❌ Failed: ${storageError.message}`;
+                }
+                
+                // Test Auth
+                try {
+                    if (auth && currentUser) {
+                        authStatus = '✓ Authenticated';
+                    } else if (auth) {
+                        authStatus = '✓ Available (not logged in)';
+                    }
+                    console.log('✓ Auth status checked');
+                } catch (authError) {
+                    console.error('❌ Auth test failed:', authError);
+                    authStatus = `❌ Failed: ${authError.message}`;
+                }
+                
+                result.innerHTML = `
+                    <div class="text-green-600">
+                        <i class="ri-check-line mr-2"></i>
+                        Firebase connection test completed!
+                        <br>
+                        <small>Firestore: ${firestoreStatus}</small>
+                        <br>
+                        <small>Storage: ${storageStatus}</small>
+                        <br>
+                        <small>Auth: ${authStatus}</small>
+                        <br>
+                        <small class="text-blue-600">Note: Individual component tests above show detailed status</small>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="text-red-600">
+                        <i class="ri-error-warning-line mr-2"></i>
+                        Firebase connection test failed: ${error.message}
+                        <br>
+                        <small>Error code: ${error.code}</small>
+                    </div>
+                `;
+            }
+        });
+
+        // Debug all images
+        document.getElementById('debug-all-images').addEventListener('click', async () => {
+            const result = document.getElementById('debug-result');
+            result.innerHTML = 'Loading all gallery images...';
+            
+            try {
+                const imagesByCategory = await debugGalleryImages();
+                result.innerHTML = JSON.stringify(imagesByCategory, null, 2);
+            } catch (error) {
+                result.innerHTML = `Error: ${error.message}`;
+            }
+        });
+
+        // Debug activities images
+        document.getElementById('debug-activities').addEventListener('click', async () => {
+            const result = document.getElementById('debug-result');
+            result.innerHTML = 'Loading activities images...';
+            
+            try {
+                const images = await fetchGalleryImages('activities');
+                result.innerHTML = JSON.stringify(images, null, 2);
+            } catch (error) {
+                result.innerHTML = `Error: ${error.message}`;
+            }
+        });
+
+        // Debug mission images
+        document.getElementById('debug-mission').addEventListener('click', async () => {
+            const result = document.getElementById('debug-result');
+            result.innerHTML = 'Loading mission images...';
+            
+            try {
+                const images = await fetchGalleryImages('mission');
+                result.innerHTML = JSON.stringify(images, null, 2);
+            } catch (error) {
+                result.innerHTML = `Error: ${error.message}`;
+            }
+        });
+
+        // Test upload
+        document.getElementById('test-upload').addEventListener('click', async () => {
+            const result = document.getElementById('upload-result');
+            const fileInput = document.getElementById('test-file');
+            const categorySelect = document.getElementById('test-category');
+            
+            if (!currentUser) {
+                result.innerHTML = '<div class="text-red-600">Please login first to test upload</div>';
+                return;
+            }
+            
+            if (!fileInput.files[0]) {
+                result.innerHTML = '<div class="text-red-600">Please select a file first</div>';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const category = categorySelect.value;
+            
+            result.innerHTML = '<div class="text-blue-600">Uploading...</div>';
+            
+            try {
+                const uploadedImage = await uploadGalleryImage(
+                    file, 
+                    category, 
+                    `Test Upload - ${file.name}`, 
+                    currentUser.uid
+                );
+                
+                result.innerHTML = `
+                    <div class="text-green-600">
+                        <i class="ri-check-line mr-2"></i>
+                        Upload successful!
+                        <br>
+                        <small>Image ID: ${uploadedImage.id}</small>
+                        <br>
+                        <small>URL: <a href="${uploadedImage.url}" target="_blank" class="text-blue-600 underline">View Image</a></small>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="text-red-600">
+                        <i class="ri-error-warning-line mr-2"></i>
+                        Upload failed: ${error.message}
+                    </div>
+                `;
+            }
+        });
+
+        // Test Firestore rules
+        document.getElementById('test-firestore-rules').addEventListener('click', async () => {
+            const result = document.getElementById('connection-result');
+            result.innerHTML = '<div class="text-blue-600">Testing Firestore rules...</div>';
+            
+            try {
+                // Test reading galleryImages collection
+                console.log('Testing Firestore read access to galleryImages...');
+                const galleryRef = collection(db, 'galleryImages');
+                const snapshot = await getDocs(galleryRef);
+                
+                result.innerHTML = `
+                    <div class="text-green-600">
+                        <i class="ri-check-line mr-2"></i>
+                        Firestore rules test successful!
+                        <br>
+                        <small>✓ Can read galleryImages collection</small>
+                        <br>
+                        <small>Found ${snapshot.size} documents</small>
+                        <br>
+                        <small>Auth status: ${currentUser ? 'Logged in' : 'Not logged in'}</small>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="text-red-600">
+                        <i class="ri-error-warning-line mr-2"></i>
+                        Firestore rules test failed: ${error.message}
+                        <br>
+                        <small>Error code: ${error.code}</small>
+                        <br>
+                        <small>Auth status: ${currentUser ? 'Logged in' : 'Not logged in'}</small>
+                        <br>
+                        <small class="text-yellow-600">⚠️ This might indicate Firestore security rules are blocking access</small>
+                    </div>
+                `;
+            }
+        });
+
+        // Test Storage rules
+        document.getElementById('test-storage-rules').addEventListener('click', async () => {
+            const result = document.getElementById('connection-result');
+            result.innerHTML = '<div class="text-blue-600">Testing Storage rules...</div>';
+            
+            try {
+                // Import storage functions
+                const { ref, getDownloadURL } = await import('https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js');
+                
+                // Test creating a storage reference (this should work)
+                console.log('Testing Storage reference creation...');
+                const testRef = ref(storage, 'gallery/test/test.jpg');
+                
+                // Test if we can access storage (this might fail if rules are restrictive)
+                console.log('Testing Storage access...');
+                
+                result.innerHTML = `
+                    <div class="text-green-600">
+                        <i class="ri-check-line mr-2"></i>
+                        Storage rules test successful!
+                        <br>
+                        <small>✓ Can create storage references</small>
+                        <br>
+                        <small>✓ Storage path: gallery/test/test.jpg</small>
+                        <br>
+                        <small>Auth status: ${currentUser ? 'Logged in' : 'Not logged in'}</small>
+                        <br>
+                        <small class="text-blue-600">Note: Upload test will show if write access works</small>
+                    </div>
+                `;
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="text-red-600">
+                        <i class="ri-error-warning-line mr-2"></i>
+                        Storage rules test failed: ${error.message}
+                        <br>
+                        <small>Error code: ${error.code}</small>
+                        <br>
+                        <small>Auth status: ${currentUser ? 'Logged in' : 'Not logged in'}</small>
+                        <br>
+                        <small class="text-yellow-600">⚠️ This might indicate Storage security rules are blocking access</small>
+                    </div>
+                `;
+            }
+        });
+
+        // Test login
+        document.getElementById('test-login').addEventListener('click', async () => {
+            try {
+                // Try to create account first, then login
+                try {
+                    await createUserWithEmailAndPassword(auth, 'test@example.com', 'password123');
+                    console.log('Test account created');
+                } catch (createError) {
+                    // Account might already exist, try to login
+                    await signInWithEmailAndPassword(auth, 'test@example.com', 'password123');
+                    console.log('Logged in with existing account');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

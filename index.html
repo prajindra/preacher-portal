@@ -14,6 +14,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <style>
 :where([class^="ri-"])::before { content: "\f3c2"; }
 body {
@@ -416,7 +419,7 @@ animation: shimmer 1.5s infinite;
 <a href="#" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">Home</a>
 <a href="#dashboard" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">Dashboard</a>
 <a href="#resources" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">Resources</a>
-<a href="gallery.html" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">Gallery</a>
+<a href="#about" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">Gallery</a>
 <a href="#about" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">About</a>
 <a href="#contact" class="text-gray-800 hover:text-primary font-medium transition-colors duration-300 hover-lift">Contact</a>
 </div>
@@ -673,12 +676,23 @@ Explore Reports
 <div class="bg-white rounded shadow-md overflow-hidden">
 <div class="p-4 border-b border-gray-200 flex justify-between items-center">
 <h3 class="text-lg font-semibold">Recent Reports</h3>
-<div class="flex">
-<button onclick="exportToExcel()" class="bg-white text-gray-700 border border-gray-300 px-3 py-1 !rounded-button hover:bg-gray-50 transition whitespace-nowrap text-sm mr-2">
-<i class="ri-file-excel-line mr-1"></i> Export Excel
-</button>
-<button onclick="exportToPDF()" class="bg-white text-gray-700 border border-gray-300 px-3 py-1 !rounded-button hover:bg-gray-50 transition whitespace-nowrap text-sm">
-<i class="ri-file-pdf-line mr-1"></i> Export PDF
+<div class="flex items-center gap-2">
+<!-- Export Format Selection -->
+<div class="flex items-center mr-4">
+<label class="custom-radio mr-2">
+<input type="radio" name="export-format" value="excel" id="export-excel-radio">
+<span class="radio-mark"></span>
+</label>
+<label for="export-excel-radio" class="text-sm text-gray-700 mr-4 cursor-pointer">Export Excel</label>
+<label class="custom-radio mr-2">
+<input type="radio" name="export-format" value="pdf" id="export-pdf-radio">
+<span class="radio-mark"></span>
+</label>
+<label for="export-pdf-radio" class="text-sm text-gray-700 cursor-pointer">Export PDF</label>
+</div>
+<!-- Download All Button -->
+<button onclick="downloadAllReports()" class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm mr-2">
+<i class="ri-download-cloud-line mr-1"></i> Download All
 </button>
 </div>
 </div>
@@ -690,8 +704,9 @@ Explore Reports
 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preacher</th>
 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Temple</th>
 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
-<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Books</th>
-<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prasadam</th>
+<th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Books</th>
+<th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Prasadam</th>
+<th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">New Contacts</th>
 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
 </tr>
 </thead>
@@ -708,11 +723,16 @@ Explore Reports
 </td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Kuala Lumpur</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Book Distribution</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">48</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">120</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">48</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">120</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">15</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-<button class="text-primary hover:text-primary-dark mr-3"><i class="ri-eye-line"></i></button>
-<button class="text-gray-500 hover:text-gray-700"><i class="ri-download-line"></i></button>
+<button onclick="viewReport('sample-1')" class="text-primary hover:text-primary-dark mr-3" title="View Report">
+<i class="ri-eye-line"></i>
+</button>
+<button onclick="downloadSingleReport('sample-1')" class="text-gray-500 hover:text-gray-700" title="Download Report">
+<i class="ri-download-line"></i>
+</button>
 </td>
 </tr>
 <tr>
@@ -727,11 +747,16 @@ Explore Reports
 </td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Penang</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Harinama Sankirtana</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">32</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">85</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">32</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">85</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">12</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-<button class="text-primary hover:text-primary-dark mr-3"><i class="ri-eye-line"></i></button>
-<button class="text-gray-500 hover:text-gray-700"><i class="ri-download-line"></i></button>
+<button onclick="viewReport('sample-2')" class="text-primary hover:text-primary-dark mr-3" title="View Report">
+<i class="ri-eye-line"></i>
+</button>
+<button onclick="downloadSingleReport('sample-2')" class="text-gray-500 hover:text-gray-700" title="Download Report">
+<i class="ri-download-line"></i>
+</button>
 </td>
 </tr>
 <tr>
@@ -746,11 +771,16 @@ Explore Reports
 </td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Johor Bahru</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">University Program</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">65</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">210</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">65</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">210</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">25</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-<button class="text-primary hover:text-primary-dark mr-3"><i class="ri-eye-line"></i></button>
-<button class="text-gray-500 hover:text-gray-700"><i class="ri-download-line"></i></button>
+<button onclick="viewReport('sample-3')" class="text-primary hover:text-primary-dark mr-3" title="View Report">
+<i class="ri-eye-line"></i>
+</button>
+<button onclick="downloadSingleReport('sample-3')" class="text-gray-500 hover:text-gray-700" title="Download Report">
+<i class="ri-download-line"></i>
+</button>
 </td>
 </tr>
 <tr>
@@ -765,11 +795,16 @@ Explore Reports
 </td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Kuching</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Food for Life</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">24</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">350</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">24</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">350</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">8</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-<button class="text-primary hover:text-primary-dark mr-3"><i class="ri-eye-line"></i></button>
-<button class="text-gray-500 hover:text-gray-700"><i class="ri-download-line"></i></button>
+<button onclick="viewReport('sample-4')" class="text-primary hover:text-primary-dark mr-3" title="View Report">
+<i class="ri-eye-line"></i>
+</button>
+<button onclick="downloadSingleReport('sample-4')" class="text-gray-500 hover:text-gray-700" title="Download Report">
+<i class="ri-download-line"></i>
+</button>
 </td>
 </tr>
 <tr>
@@ -784,11 +819,16 @@ Explore Reports
 </td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Ipoh</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Sunday Feast</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">42</td>
-<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">175</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">42</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">175</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">18</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-<button class="text-primary hover:text-primary-dark mr-3"><i class="ri-eye-line"></i></button>
-<button class="text-gray-500 hover:text-gray-700"><i class="ri-download-line"></i></button>
+<button onclick="viewReport('sample-5')" class="text-primary hover:text-primary-dark mr-3" title="View Report">
+<i class="ri-eye-line"></i>
+</button>
+<button onclick="downloadSingleReport('sample-5')" class="text-gray-500 hover:text-gray-700" title="Download Report">
+<i class="ri-download-line"></i>
+</button>
 </td>
 </tr>
 </tbody>
@@ -822,6 +862,72 @@ Showing <span class="font-medium">1</span> to <span class="font-medium">5</span>
 <section id="resources" class="py-16 bg-gray-50 scroll-mt-20">
 <div class="container mx-auto px-4">
 <h2 class="text-3xl font-bold text-center mb-12">Preaching Resources</h2>
+
+<!-- Admin Upload Section -->
+<div id="admin-upload-section" class="mb-8 hidden">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Upload New Resource</h3>
+            <button id="toggle-upload-form" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
+                <i class="ri-upload-line mr-2"></i>
+                Upload Material
+            </button>
+        </div>
+        
+        <div id="upload-form-container" class="hidden">
+            <form id="resource-upload-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                    <input type="text" id="resource-title" class="w-full px-3 py-2 border border-gray-300 rounded text-sm" placeholder="Enter resource title" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                    <select id="resource-category" class="w-full px-3 py-2 border border-gray-300 rounded text-sm" required>
+                        <option value="">Select Category</option>
+                        <option value="books">Books & Pamphlets</option>
+                        <option value="presentations">Presentations</option>
+                        <option value="videos">Videos & Audio</option>
+                        <option value="templates">Templates</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="resource-description" class="w-full px-3 py-2 border border-gray-300 rounded text-sm" rows="3" placeholder="Enter resource description"></textarea>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">File *</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition">
+                        <input type="file" id="resource-file" class="hidden" accept=".pdf,.doc,.docx,.ppt,.pptx,.mp3,.mp4,.avi,.mov,.zip,.rar">
+                        <div id="file-drop-zone" class="cursor-pointer">
+                            <i class="ri-upload-cloud-line text-4xl text-gray-400 mb-2"></i>
+                            <p class="text-gray-600 mb-1">Click to upload or drag and drop</p>
+                            <p class="text-xs text-gray-500">PDF, DOC, PPT, MP3, MP4, ZIP (Max 50MB)</p>
+                        </div>
+                        <div id="file-preview" class="hidden">
+                            <div class="flex items-center justify-center">
+                                <i class="ri-file-line text-2xl text-primary mr-2"></i>
+                                <span id="file-name" class="text-sm text-gray-700"></span>
+                                <button type="button" id="remove-file" class="ml-2 text-red-500 hover:text-red-700">
+                                    <i class="ri-close-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:col-span-2 flex justify-end gap-3">
+                    <button type="button" id="cancel-upload" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="submit-upload" class="bg-primary text-white px-6 py-2 rounded hover:bg-opacity-90 transition">
+                        <i class="ri-upload-line mr-2"></i>
+                        Upload Resource
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Resource Tabs -->
 <div class="mb-8 flex justify-center">
 <div class="inline-flex p-1 bg-white rounded-full shadow-sm">
@@ -831,230 +937,54 @@ Showing <span class="font-medium">1</span> to <span class="font-medium">5</span>
 <button id="templates-tab" class="px-6 py-2 rounded-full text-gray-700 hover:bg-gray-100 whitespace-nowrap">Templates</button>
 </div>
 </div>
-<div id="books-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-<!-- Original books and pamphlets content -->
-</div>
-<div id="presentations-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
-<!-- Presentation 1 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Professional%20PowerPoint%20presentation%20about%20Krishna%20consciousness%20philosophy%2C%20clean%20modern%20slides%2C%20spiritual%20diagrams%2C%20teaching%20materials%2C%20high%20quality%20graphics%2C%20light%20background&width=600&height=400&seq=18&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Introduction to Krishna Consciousness</h3>
-<p class="text-gray-600 text-sm mb-4">Comprehensive presentation for newcomers about the basics of Krishna consciousness philosophy.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">PPTX • 8.5 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-<!-- Presentation 2 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Bhagavad%20Gita%20chapter%20summary%20presentation%2C%20elegant%20slides%20with%20Sanskrit%20verses%2C%20spiritual%20artwork%2C%20teaching%20materials%2C%20high%20quality%20graphics%2C%20light%20background&width=600&height=400&seq=19&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Bhagavad Gita Chapter Summaries</h3>
-<p class="text-gray-600 text-sm mb-4">Chapter-wise presentation of Bhagavad Gita with key verses and explanations.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">PPTX • 12.3 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-<!-- Presentation 3 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Vedic%20culture%20and%20traditions%20presentation%2C%20colorful%20slides%20about%20festivals%20and%20customs%2C%20educational%20content%2C%20high%20quality%20graphics%2C%20light%20background&width=600&height=400&seq=20&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Vedic Culture & Traditions</h3>
-<p class="text-gray-600 text-sm mb-4">Educational presentation about Vedic customs, festivals, and traditional practices.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">PPTX • 15.8 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-<!-- Presentation 4 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Temple%20worship%20and%20deity%20service%20presentation%2C%20detailed%20slides%20about%20altar%20setup%20and%20puja%2C%20instructional%20content%2C%20high%20quality%20graphics%2C%20light%20background&width=600&height=400&seq=21&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Temple Worship Guidelines</h3>
-<p class="text-gray-600 text-sm mb-4">Detailed presentation about temple services, deity worship, and altar arrangements.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">PPTX • 10.2 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-</div>
+
 <!-- Search and Filter -->
 <div class="bg-white p-4 rounded shadow-md mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
 <div class="relative w-full md:w-1/2">
 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 <i class="ri-search-line text-gray-400"></i>
 </div>
-<input type="text" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm" placeholder="Search resources...">
+<input type="text" id="resource-search" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded text-sm" placeholder="Search resources...">
 </div>
 <div class="flex items-center gap-4 w-full md:w-auto">
 <div class="flex items-center">
-<label class="mr-2 text-sm text-gray-700">Language:</label>
-<div class="relative">
-<button class="bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center w-40">
-<span>All Languages</span>
-<i class="ri-arrow-down-s-line"></i>
-</button>
-</div>
-</div>
-<div class="flex items-center">
 <label class="mr-2 text-sm text-gray-700">Sort by:</label>
 <div class="relative">
-<button class="bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm flex justify-between items-center w-40">
-<span>Most Recent</span>
-<i class="ri-arrow-down-s-line"></i>
-</button>
+<select id="resource-sort" class="bg-white border border-gray-300 rounded px-4 py-2 text-left text-sm">
+<option value="newest">Most Recent</option>
+<option value="oldest">Oldest First</option>
+<option value="name">Name A-Z</option>
+<option value="downloads">Most Downloaded</option>
+</select>
 </div>
 </div>
 </div>
 </div>
-<!-- Resource Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-<!-- Resource 1 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Bhagavad%20Gita%20book%20with%20ornate%20cover%2C%20golden%20embossing%2C%20spiritual%20text%2C%20high%20quality%2C%20professional%20photography%2C%20detailed%20cover%20art%2C%20soft%20lighting%2C%20clean%20background%2C%20product%20photography&width=600&height=400&seq=2&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Bhagavad Gita As It Is</h3>
-<p class="text-gray-600 text-sm mb-4">The definitive guide to understanding the essence of Krishna consciousness and spiritual knowledge.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">English • PDF • 968 KB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
+
+<!-- Dynamic Resource Content -->
+<div id="books-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Content will be loaded dynamically -->
+</div>
+<div id="presentations-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
+<!-- Content will be loaded dynamically -->
+</div>
+<div id="videos-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
+<!-- Content will be loaded dynamically -->
+</div>
+<div id="templates-content" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
+<!-- Content will be loaded dynamically -->
+</div>
+
+<!-- Loading State -->
+<div id="resources-loading" class="hidden">
+<div class="col-span-full flex justify-center items-center py-12">
+<div class="text-center">
+<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+<p class="text-gray-600">Loading resources...</p>
 </div>
 </div>
 </div>
-<!-- Resource 2 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Colorful%20pamphlet%20about%20Krishna%20consciousness%2C%20vibrant%20spiritual%20illustrations%2C%20informational%20brochure%2C%20clean%20design%2C%20professional%20print%20material%2C%20high%20quality%2C%20detailed%20graphics&width=600&height=400&seq=3&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Introduction to Krishna Consciousness</h3>
-<p class="text-gray-600 text-sm mb-4">A beginner's guide to understanding the philosophy and practices of Krishna consciousness.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">Multiple Languages • PDF • 4.2 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-<!-- Resource 3 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Spiritual%20cookbook%20with%20vegetarian%20prasadam%20recipes%2C%20beautifully%20arranged%20food%20offerings%2C%20colorful%20Indian%20dishes%2C%20professional%20food%20photography%2C%20high%20quality%2C%20detailed%20presentation&width=600&height=400&seq=4&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Higher Taste: Vegetarian Cookbook</h3>
-<p class="text-gray-600 text-sm mb-4">Delicious vegetarian recipes for preparing prasadam offerings with devotion and love.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">English • PDF • 12.5 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-<!-- Resource 4 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Chanting%20beads%20%28japa%20mala%29%20with%20instruction%20manual%2C%20wooden%20beads%20on%20spiritual%20cloth%2C%20meditation%20tools%2C%20soft%20lighting%2C%20clean%20background%2C%20product%20photography%2C%20high%20quality&width=600&height=400&seq=5&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Japa Meditation Guide</h3>
-<p class="text-gray-600 text-sm mb-4">A comprehensive guide to chanting the Hare Krishna maha-mantra with attention and devotion.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">English • PDF • 3.8 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-<!-- Resource 5 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Colorful%20festival%20guide%20for%20Janmashtami%20celebration%2C%20decorations%2C%20altar%20setup%2C%20Krishna%20worship%2C%20festive%20atmosphere%2C%20professional%20photography%2C%20high%20quality%2C%20detailed%20instructions&width=600&height=400&seq=6&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Festival Guide: Janmashtami</h3>
-<p class="text-gray-600 text-sm mb-4">Complete planning guide for organizing a successful Janmashtami celebration at your center.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">English • PDF • 8.7 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-<!-- Resource 6 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Professional%20PowerPoint%20presentation%20about%20Bhagavad%20Gita%20philosophy%2C%20clean%20slides%2C%20spiritual%20diagrams%2C%20teaching%20materials%2C%20high%20quality%2C%20detailed%20graphics&width=600&height=400&seq=7&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Bhagavad Gita Presentation</h3>
-<p class="text-gray-600 text-sm mb-4">Ready-to-use presentation slides for teaching the core concepts of Bhagavad Gita philosophy.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">English • PPTX • 15.2 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-<!-- Resource 7 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Spiritual%20outreach%20flyer%20template%2C%20clean%20design%2C%20vibrant%20colors%2C%20professional%20layout%2C%20event%20announcement%2C%20high%20quality%2C%20detailed%20graphics&width=600&height=400&seq=8&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Outreach Flyer Templates</h3>
-<p class="text-gray-600 text-sm mb-4">Customizable flyer templates for promoting your temple events and programs in the community.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">Multiple Formats • ZIP • 24.5 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-<!-- Resource 8 -->
-<div class="bg-white rounded shadow-md overflow-hidden hover:shadow-lg transition">
-<div class="h-48 bg-gray-200" style="background-image: url('https://readdy.ai/api/search-image?query=Kirtan%20music%20audio%20tracks%2C%20traditional%20instruments%2C%20devotional%20singing%2C%20professional%20audio%20recording%2C%20high%20quality%2C%20detailed%20album%20cover&width=600&height=400&seq=9&orientation=landscape'); background-size: cover; background-position: center;"></div>
-<div class="p-4">
-<h3 class="font-semibold text-lg mb-2">Kirtan Music Collection</h3>
-<p class="text-gray-600 text-sm mb-4">A collection of beautiful kirtans and bhajans for temple programs and personal meditation.</p>
-<div class="flex justify-between items-center">
-<span class="text-xs text-gray-500">MP3 • ZIP • 86.3 MB</span>
-<button class="bg-primary text-white px-3 py-1 !rounded-button hover:bg-opacity-90 transition whitespace-nowrap text-sm">
-<i class="ri-download-line mr-1"></i> Download
-</button>
-</div>
-</div>
-</div>
-</div>
-<!-- Pagination -->
-<div class="mt-8 flex justify-center">
-<nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-<button class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-<span class="sr-only">Previous</span>
-<i class="ri-arrow-left-s-line"></i>
-</button>
-<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-primary text-sm font-medium text-white hover:bg-primary-dark">1</button>
-<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</button>
-<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</button>
-<span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
-<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">8</button>
-<button class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">9</button>
-<button class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-<span class="sr-only">Next</span>
-<i class="ri-arrow-right-s-line"></i>
-</button>
-</nav>
-</div>
+
 </div>
 </section>
 <!-- About Section -->
@@ -1069,33 +999,28 @@ Showing <span class="font-medium">1</span> to <span class="font-medium">5</span>
 <p class="text-gray-700 mb-4">Our mission is to systematically organize preaching activities across the country, support dedicated preachers, and create a sustainable ecosystem for spiritual education and practice.</p>
 <p class="text-gray-700">Through our mobile app and coordinated efforts, we aim to reach every town and village in Malaysia with the message of love, compassion, and spiritual wisdom as taught by His Divine Grace A.C. Bhaktivedanta Swami Prabhupada.</p>
 </div>
-<div class="w-full md:w-1/2">
-<img src="https://readdy.ai/api/search-image?query=Devotees%20engaged%20in%20preaching%20activities%2C%20sharing%20spiritual%20knowledge%2C%20book%20distribution%2C%20colorful%20traditional%20dress%2C%20joyful%20atmosphere%2C%20outdoor%20setting%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=10&orientation=landscape" alt="ISKCON Preaching" class="rounded shadow-md w-full h-auto">
+                <div class="w-full md:w-1/2">
+                    <img id="mission-image" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="ISKCON Malaysia Preaching Mission" class="rounded shadow-md w-full h-auto">
+                </div>
 </div>
 </div>
-</div>
-<!-- Photo Gallery -->
-<h3 class="text-2xl font-semibold text-center mb-8">Our Preaching Activities</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-<div class="overflow-hidden rounded shadow-md">
-<img src="https://readdy.ai/api/search-image?query=Hare%20Krishna%20devotees%20performing%20kirtan%20with%20traditional%20instruments%2C%20colorful%20festival%2C%20joyful%20singing%2C%20outdoor%20event%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=11&orientation=landscape" alt="Kirtan Performance" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
-</div>
-<div class="overflow-hidden rounded shadow-md">
-<img src="https://readdy.ai/api/search-image?query=Food%20distribution%20program%2C%20prasadam%20serving%20to%20people%20in%20need%2C%20charity%20work%2C%20volunteers%20in%20action%2C%20community%20service%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=12&orientation=landscape" alt="Food Distribution" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
-</div>
-<div class="overflow-hidden rounded shadow-md">
-<img src="https://readdy.ai/api/search-image?query=Book%20distribution%20at%20university%20campus%2C%20students%20receiving%20spiritual%20literature%2C%20educational%20outreach%2C%20young%20people%20engaged%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=13&orientation=landscape" alt="Book Distribution" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
-</div>
-<div class="overflow-hidden rounded shadow-md">
-<img src="https://readdy.ai/api/search-image?query=Ratha%20Yatra%20festival%20in%20Malaysia%2C%20colorful%20chariot%20procession%2C%20crowds%20of%20devotees%2C%20cultural%20celebration%2C%20traditional%20decorations%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=14&orientation=landscape" alt="Ratha Yatra Festival" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
-</div>
-<div class="overflow-hidden rounded shadow-md">
-<img src="https://readdy.ai/api/search-image?query=Spiritual%20retreat%20in%20natural%20setting%2C%20meditation%20session%2C%20devotees%20in%20peaceful%20surroundings%2C%20yoga%20practice%2C%20serene%20atmosphere%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=15&orientation=landscape" alt="Spiritual Retreat" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
-</div>
-<div class="overflow-hidden rounded shadow-md">
-<img src="https://readdy.ai/api/search-image?query=Youth%20program%20at%20ISKCON%20temple%2C%20young%20devotees%20learning%20traditional%20arts%2C%20cultural%20education%2C%20engaging%20activities%2C%20colorful%20setting%2C%20high%20quality%2C%20detailed%20scene%2C%20professional%20photography&width=600&height=400&seq=16&orientation=landscape" alt="Youth Program" class="w-full h-64 object-cover object-top hover:scale-105 transition duration-300">
-</div>
-</div>
+        <!-- Photo Gallery -->
+        <h3 class="text-2xl font-semibold text-center mb-8">Our Preaching Activities</h3>
+        <div id="preaching-activities-gallery" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Images will be loaded from database -->
+        </div>
+        <div class="text-center mt-8">
+            <div id="view-gallery-button-container">
+                <!-- Button will be dynamically shown/hidden based on user role -->
+            </div>
+            <!-- Temporary Debug Button -->
+            <div class="mt-4">
+                <button id="debug-role-btn" class="bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600 transition" onclick="debugCurrentUserRole()">
+                    <i class="ri-bug-line mr-1"></i>
+                    Debug Role Access
+                </button>
+            </div>
+        </div>
 </div>
 </section>
 <!-- Download App Section -->
@@ -1352,7 +1277,431 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize dashboard filters
     initializeDashboardFilters();
+    
+    // Load preaching activities gallery
+    loadPreachingActivitiesGallery();
+    
+    // Load mission image for About section
+    loadMissionImage();
+    
+    // Initialize View Gallery button based on user role
+    initializeViewGalleryButton();
+    
+    // Initialize Resources section
+    initializeResourcesSection();
 });
+
+// Initialize View Gallery Button with Role-Based Access Control
+async function initializeViewGalleryButton() {
+    try {
+        console.log('=== INITIALIZING VIEW GALLERY BUTTON ===');
+        const buttonContainer = document.getElementById('view-gallery-button-container');
+        
+        if (!buttonContainer) {
+            console.error('View gallery button container not found');
+            return;
+        }
+        
+        // Import Firebase auth
+        const { auth } = await import('./firebase-config.js');
+        const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js');
+        
+        // Listen for authentication state changes
+        onAuthStateChanged(auth, async (user) => {
+            console.log('Auth state changed for gallery button:', user ? 'User logged in' : 'No user');
+            
+            if (!user) {
+                // User not logged in - show login prompt
+                buttonContainer.innerHTML = `
+                    <div class="text-center">
+                        <p class="text-gray-600 mb-4">
+                            <i class="ri-lock-line mr-1"></i>
+                            Please log in to access the full gallery
+                        </p>
+                        <button onclick="openLoginModal()" class="bg-primary text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition">
+                            <i class="ri-login-line mr-2"></i>
+                            Login to View Gallery
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // User is logged in - check their role
+            try {
+                console.log('=== ROLE CHECK DEBUG START ===');
+                console.log('User object:', user);
+                console.log('User UID:', user.uid);
+                console.log('User Email:', user.email);
+                console.log('User Display Name:', user.displayName);
+                
+                const { getUserRole } = await import('./firebase-data.js');
+                console.log('getUserRole function imported successfully');
+                
+                const userRole = await getUserRole(user.uid, user.email);
+                console.log('=== ROLE CHECK RESULT ===');
+                console.log('Retrieved role:', userRole);
+                console.log('Role type:', typeof userRole);
+                console.log('Role comparison tests:');
+                console.log('  userRole === "admin":', userRole === 'admin');
+                console.log('  userRole === "super admin":', userRole === 'super admin');
+                console.log('  userRole.includes("admin"):', userRole.includes('admin'));
+                
+                // Check for admin roles: admin or super_admin
+                const normalizedRole = userRole.toLowerCase().trim();
+                const isAdmin = normalizedRole === 'admin' || normalizedRole === 'super_admin';
+                console.log('Normalized role:', normalizedRole);
+                console.log('Final admin check result:', isAdmin);
+                
+                if (isAdmin) {
+                    // User has admin privileges - show the gallery button
+                    console.log('✅ User has admin privileges, showing gallery button');
+                    buttonContainer.innerHTML = `
+                        <a href="gallery.html" class="inline-flex items-center bg-primary text-white px-6 py-3 rounded-lg hover:bg-opacity-90 transition hover:shadow-lg">
+                            <i class="ri-image-line mr-2"></i>
+                            View Full Gallery
+                        </a>
+                    `;
+                } else {
+                    // User doesn't have admin privileges - show restricted message with debug info
+                    console.log('❌ User does not have admin privileges');
+                    console.log('Current role:', userRole);
+                    buttonContainer.innerHTML = `
+                        <div class="text-center">
+                            <p class="text-gray-600 mb-2">
+                                <i class="ri-shield-line mr-1"></i>
+                                Gallery access is restricted to administrators
+                            </p>
+                            <p class="text-sm text-gray-500 mb-2">
+                                Contact your temple administrator for access
+                            </p>
+                            <p class="text-xs text-red-500">
+                                Debug: Current role detected as "${userRole}"
+                            </p>
+                        </div>
+                    `;
+                }
+                console.log('=== ROLE CHECK DEBUG END ===');
+            } catch (error) {
+                console.error('Error checking user role:', error);
+                // On error, show a generic message
+                buttonContainer.innerHTML = `
+                    <div class="text-center">
+                        <p class="text-gray-600 mb-4">
+                            <i class="ri-error-warning-line mr-1"></i>
+                            Unable to verify access permissions
+                        </p>
+                        <button onclick="location.reload()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
+                            <i class="ri-refresh-line mr-2"></i>
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        });
+        
+        console.log('=== VIEW GALLERY BUTTON INITIALIZATION COMPLETE ===');
+    } catch (error) {
+        console.error('Error initializing view gallery button:', error);
+        
+        // Show error state in button container
+        const buttonContainer = document.getElementById('view-gallery-button-container');
+        if (buttonContainer) {
+            buttonContainer.innerHTML = `
+                <div class="text-center">
+                    <p class="text-red-600 mb-4">
+                        <i class="ri-error-warning-line mr-1"></i>
+                        Error loading gallery access controls
+                    </p>
+                    <button onclick="location.reload()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
+                        <i class="ri-refresh-line mr-2"></i>
+                        Reload Page
+                    </button>
+                </div>
+            `;
+        }
+    }
+}
+
+
+// Load Preaching Activities Gallery
+async function loadPreachingActivitiesGallery() {
+    try {
+        console.log('=== LOADING PREACHING ACTIVITIES GALLERY ===');
+        const { fetchGalleryImages, debugGalleryImages } = await import('./firebase-data.js');
+        const galleryContainer = document.getElementById('preaching-activities-gallery');
+        
+        if (!galleryContainer) {
+            console.error('Gallery container not found');
+            return;
+        }
+        
+        // Show loading state
+        galleryContainer.innerHTML = `
+            <div class="col-span-full flex justify-center items-center py-12">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p class="text-gray-600">Loading preaching activities...</p>
+                </div>
+            </div>
+        `;
+        
+        // Debug: Check all gallery images first
+        console.log('=== DEBUGGING GALLERY IMAGES ===');
+        const allImages = await debugGalleryImages();
+        console.log('All images by category:', allImages);
+        
+        // Fetch images from 'activities' category
+        console.log('Fetching activities images...');
+        const images = await fetchGalleryImages('activities');
+        console.log('Activities images fetched:', images.length, images);
+        
+        // Also try fetching mission images to see if there are any
+        const missionImages = await fetchGalleryImages('mission');
+        console.log('Mission images fetched:', missionImages.length, missionImages);
+        
+        // Clear loading state
+        galleryContainer.innerHTML = '';
+        
+        // Prioritize activities images, but show mission images if activities are empty
+        let displayImages = [];
+        let categoryMessage = '';
+        
+        if (images.length > 0) {
+            displayImages = images;
+            categoryMessage = 'activities';
+            console.log('Using activities images:', displayImages.length);
+        } else if (missionImages.length > 0) {
+            displayImages = missionImages;
+            categoryMessage = 'mission';
+            console.log('Using mission images as fallback:', displayImages.length);
+            
+            // Add info message about showing mission images
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'col-span-full mb-6';
+            infoDiv.innerHTML = `
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-center justify-center">
+                        <i class="ri-information-line text-blue-600 mr-2"></i>
+                        <p class="text-blue-800 text-sm">
+                            Showing mission images. 
+                            <a href="gallery.html?tab=activities" class="text-blue-900 underline ml-1">Upload activities images</a>
+                        </p>
+                    </div>
+                </div>
+            `;
+            galleryContainer.appendChild(infoDiv);
+        }
+        
+        if (displayImages.length === 0) {
+            // Show empty state with debug button
+            galleryContainer.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="ri-image-line text-gray-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Images Yet</h3>
+                    <p class="text-gray-600 mb-4">Upload images to the gallery to showcase your preaching activities.</p>
+                    <div class="space-y-2">
+                        <a href="gallery.html" class="inline-flex items-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition">
+                            <i class="ri-upload-line mr-2"></i>
+                            Upload Images
+                        </a>
+                        <br>
+                        <button onclick="debugGalleryData()" class="inline-flex items-center bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition text-sm">
+                            <i class="ri-bug-line mr-2"></i>
+                            Debug Gallery Data
+                        </button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Limit to 6 images for homepage preview
+        const finalImages = displayImages.slice(0, 6);
+        console.log(`Displaying ${finalImages.length} ${categoryMessage} images`);
+        
+        // Create image grid
+        finalImages.forEach((image, index) => {
+            const imageCard = document.createElement('div');
+            imageCard.className = `bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 hover-lift animate-fade-in animate-delay-${(index + 1) * 100}`;
+            
+            imageCard.innerHTML = `
+                <div class="relative group cursor-pointer" onclick="openImageModal('${image.url}', '${image.title}', '${image.uploadedAt}')">
+                    <img src="${image.url}" alt="${image.title}" class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105" 
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500\\'>Image Not Available</div>'"
+                         onload="console.log('Image loaded successfully:', '${image.title}')">
+                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
+                        <i class="ri-eye-line text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></i>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <p class="text-sm text-gray-600">
+                        <i class="ri-calendar-line mr-1"></i>
+                        ${new Date(image.uploadedAt).toLocaleDateString()}
+                    </p>
+                </div>
+            `;
+            
+            galleryContainer.appendChild(imageCard);
+        });
+        
+        console.log(`=== PREACHING ACTIVITIES GALLERY LOADED SUCCESSFULLY ===`);
+        console.log(`Loaded ${finalImages.length} ${categoryMessage} images for preaching activities section`);
+        
+    } catch (error) {
+        console.error('Error loading preaching activities gallery:', error);
+        
+        // Show error state
+        const galleryContainer = document.getElementById('preaching-activities-gallery');
+        if (galleryContainer) {
+            galleryContainer.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="ri-error-warning-line text-red-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Failed to Load Images</h3>
+                    <p class="text-gray-600 mb-4">There was an error loading the preaching activities gallery: ${error.message}</p>
+                    <div class="space-y-2">
+                        <button onclick="loadPreachingActivitiesGallery()" class="inline-flex items-center bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition">
+                            <i class="ri-refresh-line mr-2"></i>
+                            Try Again
+                        </button>
+                        <br>
+                        <button onclick="debugGalleryData()" class="inline-flex items-center bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition text-sm">
+                            <i class="ri-bug-line mr-2"></i>
+                            Debug Gallery Data
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    }
+}
+
+// Debug function to check gallery data
+window.debugGalleryData = async function() {
+    try {
+        const { debugGalleryImages, fetchGalleryImages } = await import('./firebase-data.js');
+        
+        console.log('=== MANUAL GALLERY DEBUG ===');
+        
+        // Check all images
+        const allImagesByCategory = await debugGalleryImages();
+        
+        // Check activities specifically
+        const activitiesImages = await fetchGalleryImages('activities');
+        console.log('Direct activities fetch result:', activitiesImages);
+        
+        // Check mission images too
+        const missionImages = await fetchGalleryImages('mission');
+        console.log('Direct mission fetch result:', missionImages);
+        
+        // Show results in alert
+        const totalImages = Object.values(allImagesByCategory).reduce((sum, arr) => sum + arr.length, 0);
+        const activitiesCount = activitiesImages.length;
+        const missionCount = missionImages.length;
+        
+        alert(`Gallery Debug Results:
+Total Images: ${totalImages}
+Activities Images: ${activitiesCount}
+Mission Images: ${missionCount}
+
+Check browser console for detailed logs.`);
+        
+    } catch (error) {
+        console.error('Error in debug function:', error);
+        alert('Debug failed. Check console for details.');
+    }
+};
+
+// Open image modal for viewing
+window.openImageModal = function(imageUrl, title, uploadedAt) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[10000] p-4';
+    modal.innerHTML = `
+        <div class="relative max-w-4xl max-h-[90vh] bg-white rounded-lg overflow-hidden animate-fade-in">
+            <div class="absolute top-4 right-4 z-10">
+                <button onclick="closeImageModal()" class="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition">
+                    <i class="ri-close-line text-xl"></i>
+                </button>
+            </div>
+            <img src="${imageUrl}" alt="${title}" class="w-full h-auto max-h-[80vh] object-contain">
+            <div class="p-4 bg-white">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">${title}</h3>
+                <p class="text-sm text-gray-600">
+                    <i class="ri-calendar-line mr-1"></i>
+                    Uploaded on ${new Date(uploadedAt).toLocaleDateString()}
+                </p>
+            </div>
+        </div>
+    `;
+    
+    // Close modal when clicking outside the image
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeImageModal();
+        }
+    });
+    
+    document.body.appendChild(modal);
+    window.currentImageModal = modal;
+};
+
+// Close image modal
+window.closeImageModal = function() {
+    if (window.currentImageModal) {
+        document.body.removeChild(window.currentImageModal);
+        window.currentImageModal = null;
+    }
+};
+
+// Load Mission Image for About section
+async function loadMissionImage() {
+    try {
+        console.log('=== LOADING MISSION IMAGE ===');
+        const { fetchGalleryImages } = await import('./firebase-data.js');
+        const missionImageElement = document.getElementById('mission-image');
+        
+        if (!missionImageElement) {
+            console.error('Mission image element not found');
+            return;
+        }
+        
+        // Fetch images from 'mission' category
+        console.log('Fetching mission images...');
+        const missionImages = await fetchGalleryImages('mission');
+        console.log('Mission images fetched:', missionImages.length, missionImages);
+        
+        if (missionImages.length > 0) {
+            // Use the first (most recent) mission image
+            const selectedImage = missionImages[0];
+            console.log('Using mission image:', selectedImage.title, selectedImage.url);
+            
+            // Update the image source and alt text
+            missionImageElement.src = selectedImage.url;
+            missionImageElement.alt = selectedImage.title || 'ISKCON Malaysia Mission';
+            
+            // Add click handler to open modal
+            missionImageElement.style.cursor = 'pointer';
+            missionImageElement.onclick = () => {
+                openImageModal(selectedImage.url, selectedImage.title, selectedImage.uploadedAt);
+            };
+            
+            console.log('✓ Mission image loaded successfully');
+        } else {
+            console.log('⚠️ No mission images found, keeping default image');
+            // Keep the existing placeholder image
+        }
+        
+        console.log('=== MISSION IMAGE LOADING COMPLETE ===');
+        
+    } catch (error) {
+        console.error('Error loading mission image:', error);
+        // Keep the existing placeholder image on error
+    }
+}
 
 // Counter Animation Function
 function animateCounter(element, target) {
@@ -1508,6 +1857,15 @@ function createTableRow(report) {
     // Get initials for avatar
     const initials = report.preacher.split(' ').map(name => name.charAt(0)).join('').substring(0, 2).toUpperCase();
     
+    // Format books display - just show total number
+    let booksDisplay = report.books.toString();
+    
+    // Format prasadam display with lamps if applicable
+    let prasadamDisplay = report.prasadam.toString();
+    if (report.lamps && (report.activity === 'Temple Program' || report.activity === 'Damodara')) {
+        prasadamDisplay += ` + ${report.lamps} lamps`;
+    }
+    
     row.innerHTML = `
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.date}</td>
         <td class="px-6 py-4 whitespace-nowrap">
@@ -1520,13 +1878,14 @@ function createTableRow(report) {
         </td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.temple}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.activity}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.books}</td>
-        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.prasadam}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center" title="${booksDisplay}">${booksDisplay}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center" title="${prasadamDisplay}">${prasadamDisplay}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${report.contacts || 0}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
             <button class="text-primary hover:text-primary-dark mr-3" onclick="viewReport('${report.id}')">
                 <i class="ri-eye-line"></i>
             </button>
-            <button class="text-gray-500 hover:text-gray-700" onclick="downloadReport('${report.id}')">
+            <button class="text-gray-500 hover:text-gray-700" onclick="downloadSingleReport('${report.id}')">
                 <i class="ri-download-line"></i>
             </button>
         </td>
@@ -1774,13 +2133,16 @@ async function initializeDashboardFilters() {
             const category = categories[report.categoryId] || {};
             const user = users[report.createdBy] || {};
             
-            // Calculate total books
+            // Calculate total books and breakdown
             let totalBooks = 0;
+            let bookBreakdown = null;
             if (report.booksDistributed) {
                 if (typeof report.booksDistributed === 'object') {
-                    totalBooks = (report.booksDistributed.big || 0) + 
-                               (report.booksDistributed.medium || 0) + 
-                               (report.booksDistributed.small || 0);
+                    const small = report.booksDistributed.small || 0;
+                    const medium = report.booksDistributed.medium || 0;
+                    const large = report.booksDistributed.big || report.booksDistributed.large || 0;
+                    totalBooks = small + medium + large;
+                    bookBreakdown = { small, medium, large };
                 } else {
                     totalBooks = report.booksDistributed;
                 }
@@ -1804,6 +2166,12 @@ async function initializeDashboardFilters() {
                 activityName = category.name;
             }
             
+            // Get lamps count for Temple Program and Damodara categories
+            let lampsCount = 0;
+            if ((activityName === 'Temple Program' || activityName === 'Damodara') && report.lamps) {
+                lampsCount = report.lamps;
+            }
+            
             return {
                 id: report.id,
                 date: report.date || report.createdAt?.toDate?.()?.toISOString().split('T')[0] || 'N/A',
@@ -1812,8 +2180,11 @@ async function initializeDashboardFilters() {
                 activity: activityName,
                 categoryId: report.categoryId,
                 books: totalBooks,
+                bookBreakdown: bookBreakdown,
                 prasadam: prasadamCount,
+                lamps: lampsCount,
                 contacts: report.contacts ? report.contacts.length : 0,
+                contactsList: report.contacts || [],
                 createdAt: report.createdAt,
                 rawDate: report.createdAt?.toDate?.() || new Date(report.date || Date.now())
             };
@@ -2003,7 +2374,7 @@ function updateDashboardTable(reports) {
         // Show "no results" message
         const noResultsRow = document.createElement('tr');
         noResultsRow.innerHTML = `
-            <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+            <td colspan="8" class="px-6 py-8 text-center text-gray-500">
                 <div class="flex flex-col items-center">
                     <i class="ri-search-line text-4xl mb-2 text-gray-300"></i>
                     <p class="text-lg font-medium">No reports found</p>
@@ -2178,17 +2549,1431 @@ function goToPage(pageNumber) {
     console.log(`Navigated to page ${currentPage} of ${totalPages}`);
 }
 
-// Export filtered data (placeholder functions)
+// Authentication check function
+function checkUserAuthentication() {
+    return new Promise((resolve) => {
+        import('./firebase-config.js').then(({ auth }) => {
+            import('https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js').then(({ onAuthStateChanged }) => {
+                onAuthStateChanged(auth, (user) => {
+                    resolve(user);
+                });
+            });
+        });
+    });
+}
+
+// Show authentication required popup
+function showAuthRequiredPopup() {
+    const popup = document.createElement('div');
+    popup.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000] p-4';
+    popup.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 animate-fade-in">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="ri-lock-line text-red-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Authentication Required</h3>
+                    <p class="text-sm text-gray-600">Only registered users can download reports</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-6">Please log in to your account to access the download functionality.</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeAuthPopup()" class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">
+                    Cancel
+                </button>
+                <button onclick="openLoginModal()" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
+                    Login / Register
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    window.currentAuthPopup = popup;
+}
+
+// Close authentication popup
+window.closeAuthPopup = function() {
+    if (window.currentAuthPopup) {
+        document.body.removeChild(window.currentAuthPopup);
+        window.currentAuthPopup = null;
+    }
+};
+
+// Open login modal
+window.openLoginModal = function() {
+    closeAuthPopup();
+    const authButton = document.getElementById('auth-button');
+    if (authButton) {
+        authButton.click();
+    }
+};
+
+// Show format selection popup
+function showFormatSelectionPopup() {
+    const popup = document.createElement('div');
+    popup.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000] p-4';
+    popup.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 animate-fade-in">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+                    <i class="ri-information-line text-yellow-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Select Export Format</h3>
+                    <p class="text-sm text-gray-600">Please choose a format before downloading</p>
+                </div>
+            </div>
+            <p class="text-gray-700 mb-6">You need to select either "Export Excel" or "Export PDF" option before downloading reports.</p>
+            <div class="flex justify-end">
+                <button onclick="closeFormatPopup()" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
+                    OK
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    window.currentFormatPopup = popup;
+}
+
+// Close format selection popup
+window.closeFormatPopup = function() {
+    if (window.currentFormatPopup) {
+        document.body.removeChild(window.currentFormatPopup);
+        window.currentFormatPopup = null;
+    }
+};
+
+// Get selected export format
+function getSelectedExportFormat() {
+    const excelRadio = document.getElementById('export-excel-radio');
+    const pdfRadio = document.getElementById('export-pdf-radio');
+    
+    if (excelRadio && excelRadio.checked) {
+        return 'excel';
+    } else if (pdfRadio && pdfRadio.checked) {
+        return 'pdf';
+    }
+    return null;
+}
+
+// Export to Excel functionality
+async function exportReportsToExcel(reports, filename = 'preaching_reports.xlsx') {
+    try {
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Prepare main reports data
+        const reportsData = reports.map(report => {
+            const data = {
+                'Date': report.date,
+                'Preacher': report.preacher,
+                'Temple': report.temple,
+                'Activity': report.activity,
+                'Total Books': report.books,
+                'Small Books': report.bookBreakdown ? (report.bookBreakdown.small || 0) : '',
+                'Medium Books': report.bookBreakdown ? (report.bookBreakdown.medium || 0) : '',
+                'Large Books': report.bookBreakdown ? (report.bookBreakdown.large || 0) : '',
+                'Prasadam Served': report.prasadam,
+                'Contacts Count': report.contacts || 0
+            };
+            
+            // Add lamps field for Temple Program and Damodara categories
+            if (report.activity === 'Temple Program' || report.activity === 'Damodara') {
+                data['Lamps'] = report.lamps || 0;
+            }
+            
+            return data;
+        });
+
+        // Create main reports worksheet
+        const reportsWs = XLSX.utils.json_to_sheet(reportsData);
+
+        // Set column widths for reports sheet
+        const hasLamps = reports.some(report => report.activity === 'Temple Program' || report.activity === 'Damodara');
+        const reportsColWidths = [
+            { wch: 12 }, // Date
+            { wch: 20 }, // Preacher
+            { wch: 15 }, // Temple
+            { wch: 20 }, // Activity
+            { wch: 12 }, // Total Books
+            { wch: 12 }, // Small Books
+            { wch: 12 }, // Medium Books
+            { wch: 12 }, // Large Books
+            { wch: 15 }, // Prasadam
+            { wch: 15 }  // Contacts Count
+        ];
+        
+        if (hasLamps) {
+            reportsColWidths.push({ wch: 10 }); // Lamps
+        }
+        
+        reportsWs['!cols'] = reportsColWidths;
+
+        // Add reports worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, reportsWs, 'Preaching Reports');
+
+        // Prepare detailed contacts data
+        const contactsData = [];
+        reports.forEach(report => {
+            if (report.contactsList && Array.isArray(report.contactsList)) {
+                report.contactsList.forEach(contact => {
+                    contactsData.push({
+                        'Report Date': report.date,
+                        'Preacher': report.preacher,
+                        'Temple': report.temple,
+                        'Activity': report.activity,
+                        'Contact Name': contact.name || contact.contactName || 'Unknown',
+                        'Phone Number': contact.phone || contact.phoneNumber || contact.contactNumber || 'N/A'
+                    });
+                });
+            }
+        });
+
+        // Create contacts worksheet if there are contacts
+        if (contactsData.length > 0) {
+            const contactsWs = XLSX.utils.json_to_sheet(contactsData);
+            
+            // Set column widths for contacts sheet
+            const contactsColWidths = [
+                { wch: 12 }, // Report Date
+                { wch: 20 }, // Preacher
+                { wch: 15 }, // Temple
+                { wch: 20 }, // Activity
+                { wch: 25 }, // Contact Name
+                { wch: 20 }  // Phone Number
+            ];
+            
+            contactsWs['!cols'] = contactsColWidths;
+            
+            // Add contacts worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, contactsWs, 'Contact Details');
+        }
+
+        // Save file
+        XLSX.writeFile(wb, filename);
+        
+        console.log(`Excel file exported: ${filename}`);
+        const contactsMessage = contactsData.length > 0 ? ` with ${contactsData.length} contact details` : '';
+        showSuccessMessage(`Excel file "${filename}"${contactsMessage} has been downloaded successfully!`);
+    } catch (error) {
+        console.error('Error exporting to Excel:', error);
+        showErrorMessage('Failed to export Excel file. Please try again.');
+    }
+}
+
+// Export to PDF functionality
+async function exportReportsToPDF(reports, filename = 'preaching_reports.pdf') {
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Add ISKCON Malaysia branding header
+        doc.setFontSize(20);
+        doc.setTextColor(255, 153, 51); // Primary color
+        doc.text('ISKCON Malaysia Preaching Reports', 20, 25);
+
+        // Add subtitle with date range and branding
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        const currentDate = new Date().toLocaleDateString();
+        doc.text(`Generated on: ${currentDate}`, 20, 35);
+        doc.text(`Total Reports: ${reports.length}`, 20, 42);
+
+        // Check if any reports have lamps data
+        const hasLamps = reports.some(report => report.lamps && (report.activity === 'Temple Program' || report.activity === 'Damodara'));
+
+        // Prepare table headers and data with enhanced book breakdown
+        let tableHeaders = ['Date', 'Preacher', 'Temple', 'Activity', 'Total Books', 'S', 'M', 'L', 'Prasadam'];
+        if (hasLamps) {
+            tableHeaders.push('Lamps');
+        }
+
+        const tableData = reports.map(report => {
+            const row = [
+                report.date,
+                report.preacher,
+                report.temple,
+                report.activity,
+                report.books.toString(),
+                report.bookBreakdown ? (report.bookBreakdown.small || 0).toString() : '0',
+                report.bookBreakdown ? (report.bookBreakdown.medium || 0).toString() : '0',
+                report.bookBreakdown ? (report.bookBreakdown.large || 0).toString() : '0',
+                report.prasadam.toString()
+            ];
+            
+            if (hasLamps) {
+                row.push((report.lamps || 0).toString());
+            }
+            
+            return row;
+        });
+
+        // Define column styles based on whether lamps column is present
+        const columnStyles = {
+            0: { cellWidth: 20 }, // Date
+            1: { cellWidth: 25 }, // Preacher
+            2: { cellWidth: 20 }, // Temple
+            3: { cellWidth: 25 }, // Activity
+            4: { cellWidth: 15 }, // Total Books
+            5: { cellWidth: 8 },  // Small
+            6: { cellWidth: 8 },  // Medium
+            7: { cellWidth: 8 },  // Large
+            8: { cellWidth: 20 }  // Prasadam
+        };
+
+        if (hasLamps) {
+            columnStyles[9] = { cellWidth: 12 }; // Lamps
+        }
+
+        // Add table with enhanced formatting
+        doc.autoTable({
+            head: [tableHeaders],
+            body: tableData,
+            startY: 50,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [255, 153, 51], // Primary color
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 8
+            },
+            bodyStyles: {
+                fontSize: 7,
+                cellPadding: 2
+            },
+            columnStyles: columnStyles,
+            margin: { top: 50, left: 10, right: 10 },
+            didDrawPage: function(data) {
+                // Add page numbers with ISKCON branding
+                const pageCount = doc.internal.getNumberOfPages();
+                const pageSize = doc.internal.pageSize;
+                const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+                
+                doc.setFontSize(8);
+                doc.setTextColor(150);
+                doc.text(`ISKCON Malaysia - Page ${data.pageNumber} of ${pageCount}`, 
+                    data.settings.margin.left, 
+                    pageHeight - 10
+                );
+            }
+        });
+
+        // Add comprehensive summary section
+        const finalY = doc.lastAutoTable.finalY + 20;
+        doc.setFontSize(16);
+        doc.setTextColor(255, 153, 51);
+        doc.text('Detailed Summary', 20, finalY);
+
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        
+        // Calculate totals
+        const totalBooks = reports.reduce((sum, report) => sum + report.books, 0);
+        const totalSmallBooks = reports.reduce((sum, report) => sum + (report.bookBreakdown?.small || 0), 0);
+        const totalMediumBooks = reports.reduce((sum, report) => sum + (report.bookBreakdown?.medium || 0), 0);
+        const totalLargeBooks = reports.reduce((sum, report) => sum + (report.bookBreakdown?.large || 0), 0);
+        const totalPrasadam = reports.reduce((sum, report) => sum + report.prasadam, 0);
+        const totalContacts = reports.reduce((sum, report) => sum + (report.contacts || 0), 0);
+        const totalLamps = reports.reduce((sum, report) => sum + (report.lamps || 0), 0);
+
+        let summaryY = finalY + 15;
+        
+        // Books summary
+        doc.setFontSize(12);
+        doc.setTextColor(255, 153, 51);
+        doc.text('Book Distribution:', 20, summaryY);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        summaryY += 10;
+        doc.text(`Total Books Distributed: ${totalBooks.toLocaleString()}`, 25, summaryY);
+        summaryY += 8;
+        doc.text(`• Small Books: ${totalSmallBooks.toLocaleString()}`, 30, summaryY);
+        summaryY += 8;
+        doc.text(`• Medium Books: ${totalMediumBooks.toLocaleString()}`, 30, summaryY);
+        summaryY += 8;
+        doc.text(`• Large Books: ${totalLargeBooks.toLocaleString()}`, 30, summaryY);
+
+        // Prasadam summary
+        summaryY += 15;
+        doc.setFontSize(12);
+        doc.setTextColor(255, 153, 51);
+        doc.text('Prasadam Distribution:', 20, summaryY);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        summaryY += 10;
+        doc.text(`Total Prasadam Served: ${totalPrasadam.toLocaleString()}`, 25, summaryY);
+
+        // Lamps summary (if applicable)
+        if (totalLamps > 0) {
+            summaryY += 15;
+            doc.setFontSize(12);
+            doc.setTextColor(255, 153, 51);
+            doc.text('Temple Programs & Damodara:', 20, summaryY);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            summaryY += 10;
+            doc.text(`Total Lamps Offered: ${totalLamps.toLocaleString()}`, 25, summaryY);
+        }
+
+        // Contacts summary
+        summaryY += 15;
+        doc.setFontSize(12);
+        doc.setTextColor(255, 153, 51);
+        doc.text('Outreach Impact:', 20, summaryY);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        summaryY += 10;
+        doc.text(`Total Contacts Made: ${totalContacts.toLocaleString()}`, 25, summaryY);
+
+        // Add detailed contacts section with names and phone numbers
+        const allContacts = reports.reduce((contacts, report) => {
+            if (report.contactsList && Array.isArray(report.contactsList)) {
+                report.contactsList.forEach(contact => {
+                    const name = contact.name || contact.contactName || 'Unknown';
+                    const phone = contact.phone || contact.phoneNumber || contact.contactNumber || 'N/A';
+                    const reportDate = report.date;
+                    const preacher = report.preacher;
+                    contacts.push({ name, phone, reportDate, preacher });
+                });
+            }
+            return contacts;
+        }, []);
+
+        if (allContacts.length > 0) {
+            summaryY += 15;
+            doc.setFontSize(12);
+            doc.setTextColor(255, 153, 51);
+            doc.text('Contact Details:', 20, summaryY);
+
+            // Create contacts table
+            const contactHeaders = ['Name', 'Phone Number', 'Date', 'Preacher'];
+            const contactData = allContacts.map(contact => [
+                contact.name,
+                contact.phone,
+                contact.reportDate,
+                contact.preacher
+            ]);
+
+            doc.autoTable({
+                head: [contactHeaders],
+                body: contactData,
+                startY: summaryY + 10,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [255, 153, 51],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    fontSize: 9
+                },
+                bodyStyles: {
+                    fontSize: 8,
+                    cellPadding: 3
+                },
+                columnStyles: {
+                    0: { cellWidth: 40 }, // Name
+                    1: { cellWidth: 35 }, // Phone
+                    2: { cellWidth: 25 }, // Date
+                    3: { cellWidth: 35 }  // Preacher
+                },
+                margin: { top: 10, left: 20, right: 20 }
+            });
+
+            summaryY = doc.lastAutoTable.finalY + 10;
+        }
+
+        // Add footer with spiritual message
+        summaryY += 20;
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        doc.text('Hare Krishna Hare Krishna Krishna Krishna Hare Hare', 20, summaryY);
+        summaryY += 8;
+        doc.text('Hare Rama Hare Rama Rama Rama Hare Hare', 20, summaryY);
+
+        // Save PDF
+        doc.save(filename);
+        
+        console.log(`Enhanced PDF file exported: ${filename}`);
+        showSuccessMessage(`PDF file "${filename}" with detailed book breakdown has been downloaded successfully!`);
+    } catch (error) {
+        console.error('Error exporting to PDF:', error);
+        showErrorMessage('Failed to export PDF file. Please try again.');
+    }
+}
+
+// Show success message
+function showSuccessMessage(message) {
+    const popup = document.createElement('div');
+    popup.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-[10001] animate-slide-in-right';
+    popup.innerHTML = `
+        <div class="flex items-center">
+            <i class="ri-check-line mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    
+    setTimeout(() => {
+        if (document.body.contains(popup)) {
+            document.body.removeChild(popup);
+        }
+    }, 5000);
+}
+
+// Show error message
+function showErrorMessage(message) {
+    const popup = document.createElement('div');
+    popup.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-[10001] animate-slide-in-right';
+    popup.innerHTML = `
+        <div class="flex items-center">
+            <i class="ri-error-warning-line mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.body.appendChild(popup);
+    
+    setTimeout(() => {
+        if (document.body.contains(popup)) {
+            document.body.removeChild(popup);
+        }
+    }, 5000);
+}
+
+// Download all reports functionality
+window.downloadAllReports = async function() {
+    try {
+        const user = await checkUserAuthentication();
+        if (!user) {
+            showAuthRequiredPopup();
+            return;
+        }
+
+        const format = getSelectedExportFormat();
+        if (!format) {
+            showFormatSelectionPopup();
+            return;
+        }
+
+        if (filteredReports.length === 0) {
+            showErrorMessage('No reports available to download. Please adjust your filters.');
+            return;
+        }
+
+        const timestamp = new Date().toISOString().split('T')[0];
+        const filename = `preaching_reports_${timestamp}`;
+
+        if (format === 'excel') {
+            await exportReportsToExcel(filteredReports, `${filename}.xlsx`);
+        } else if (format === 'pdf') {
+            await exportReportsToPDF(filteredReports, `${filename}.pdf`);
+        }
+    } catch (error) {
+        console.error('Error downloading all reports:', error);
+        showErrorMessage('Failed to download reports. Please try again.');
+    }
+};
+
+// Download single report functionality
+window.downloadSingleReport = async function(reportId) {
+    try {
+        const user = await checkUserAuthentication();
+        if (!user) {
+            showAuthRequiredPopup();
+            return;
+        }
+
+        const format = getSelectedExportFormat();
+        if (!format) {
+            showFormatSelectionPopup();
+            return;
+        }
+
+        // Find the specific report
+        const report = filteredReports.find(r => r.id === reportId) || 
+                      allReports.find(r => r.id === reportId);
+        
+        if (!report) {
+            showErrorMessage('Report not found.');
+            return;
+        }
+
+        const filename = `report_${report.preacher.replace(/\s+/g, '_')}_${report.date}`;
+
+        if (format === 'excel') {
+            await exportReportsToExcel([report], `${filename}.xlsx`);
+        } else if (format === 'pdf') {
+            await exportReportsToPDF([report], `${filename}.pdf`);
+        }
+    } catch (error) {
+        console.error('Error downloading single report:', error);
+        showErrorMessage('Failed to download report. Please try again.');
+    }
+};
+
+// View report functionality (available to all users)
+window.viewReport = async function(reportId) {
+    try {
+        // Check user authentication status
+        const user = await checkUserAuthentication();
+        
+        // Find the specific report
+        let report = filteredReports.find(r => r.id === reportId) || 
+                     allReports.find(r => r.id === reportId);
+        
+        if (!report) {
+            showErrorMessage('Report not found.');
+            return;
+        }
+
+        // If we need to get the full report data with contacts from Firebase (only for authenticated users)
+        if (user && !report.contactsList && report.id !== 'sample-1' && report.id !== 'sample-2' && report.id !== 'sample-3' && report.id !== 'sample-4' && report.id !== 'sample-5') {
+            try {
+                const { fetchSingleActivityReport } = await import('./firebase-data.js');
+                const fullReport = await fetchSingleActivityReport(report.id);
+                if (fullReport && fullReport.contacts) {
+                    report.contactsList = fullReport.contacts;
+                }
+            } catch (error) {
+                console.log('Could not fetch full report data:', error);
+            }
+        }
+
+        // Prepare book breakdown display for modal
+        let bookBreakdownHtml = '';
+        if (report.bookBreakdown && (report.bookBreakdown.small || report.bookBreakdown.medium || report.bookBreakdown.large)) {
+            bookBreakdownHtml = `
+                <div class="md:col-span-2 mt-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Book Distribution Breakdown</label>
+                    <div class="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded">
+                        <div class="text-center">
+                            <p class="text-lg font-bold text-primary">${report.bookBreakdown.small || 0}</p>
+                            <p class="text-sm text-gray-600">Small Books</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-lg font-bold text-primary">${report.bookBreakdown.medium || 0}</p>
+                            <p class="text-sm text-gray-600">Medium Books</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-lg font-bold text-primary">${report.bookBreakdown.large || 0}</p>
+                            <p class="text-sm text-gray-600">Large Books</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Prepare lamps display for Temple Program and Damodara
+        let lampsHtml = '';
+        if (report.lamps && (report.activity === 'Temple Program' || report.activity === 'Damodara')) {
+            lampsHtml = `
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Lamps Offered</label>
+                    <p class="text-gray-900 text-2xl font-bold text-primary">${report.lamps}</p>
+                </div>
+            `;
+        }
+
+        // Prepare contacts list for outreach impact (only show for authenticated users)
+        let contactsListHtml = '';
+        if (user) {
+            // Show contact details only for registered users
+            if (report.contactsList && Array.isArray(report.contactsList) && report.contactsList.length > 0) {
+                const contactsHtml = report.contactsList.map(contact => {
+                    const name = contact.name || contact.contactName || 'Unknown';
+                    const phone = contact.phone || contact.phoneNumber || contact.contactNumber || 'N/A';
+                    return `
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                            <span class="font-medium text-gray-900">${name}</span>
+                            <span class="text-gray-600">${phone}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                contactsListHtml = `
+                    <div class="md:col-span-2 mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Outreach Impact - New Contacts</label>
+                        <div class="bg-gray-50 rounded-lg p-4 max-h-48 overflow-y-auto">
+                            <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
+                                <span class="font-semibold text-gray-700">Name</span>
+                                <span class="font-semibold text-gray-700">Phone Number</span>
+                            </div>
+                            ${contactsHtml}
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">Total contacts: ${report.contactsList.length}</p>
+                    </div>
+                `;
+            } else if (report.contacts > 0) {
+                contactsListHtml = `
+                    <div class="md:col-span-2 mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Outreach Impact</label>
+                        <p class="text-gray-900 text-2xl font-bold text-primary">${report.contacts} contacts made</p>
+                        <p class="text-sm text-gray-500 mt-1">Contact details not available for this report</p>
+                    </div>
+                `;
+            }
+        } else {
+            // Show only contact count for non-registered users, hide contact details
+            if (report.contacts > 0) {
+                contactsListHtml = `
+                    <div class="md:col-span-2 mt-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Outreach Impact</label>
+                        <p class="text-gray-900 text-2xl font-bold text-primary">${report.contacts} contacts made</p>
+                        <p class="text-sm text-gray-500 mt-1">
+                            <i class="ri-lock-line mr-1"></i>
+                            Contact details are only available to registered users. 
+                            <button onclick="openLoginModal()" class="text-primary hover:underline">Login</button> to view full details.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Create view modal
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000] p-4';
+        modal.innerHTML = `
+            <div class="bg-white rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto animate-fade-in">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-semibold text-gray-900">Report Details</h3>
+                        <button onclick="closeViewModal()" class="text-gray-400 hover:text-gray-600">
+                            <i class="ri-close-line text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                            <p class="text-gray-900">${report.date}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Preacher</label>
+                            <p class="text-gray-900">${report.preacher}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Temple</label>
+                            <p class="text-gray-900">${report.temple}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Activity</label>
+                            <p class="text-gray-900">${report.activity}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Books Distributed</label>
+                            <p class="text-gray-900 text-2xl font-bold text-primary">${report.books}</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prasadam Served</label>
+                            <p class="text-gray-900 text-2xl font-bold text-primary">${report.prasadam}</p>
+                        </div>
+                        ${lampsHtml}
+                    </div>
+                    ${bookBreakdownHtml}
+                    ${contactsListHtml}
+                </div>
+                <div class="p-6 border-t border-gray-200 flex justify-end">
+                    <button onclick="closeViewModal()" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition">
+                        Close
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        window.currentViewModal = modal;
+    } catch (error) {
+        console.error('Error viewing report:', error);
+        showErrorMessage('Failed to load report details.');
+    }
+};
+
+// Close view modal
+window.closeViewModal = function() {
+    if (window.currentViewModal) {
+        document.body.removeChild(window.currentViewModal);
+        window.currentViewModal = null;
+    }
+};
+
+// Initialize Resources Section
+async function initializeResourcesSection() {
+    try {
+        console.log('=== INITIALIZING RESOURCES SECTION ===');
+        
+        // Import Firebase functions
+        const { auth } = await import('./firebase-config.js');
+        const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js');
+        const { 
+            fetchResources, 
+            uploadResource, 
+            getUserRole, 
+            incrementDownloadCount,
+            listenToResources 
+        } = await import('./firebase-data.js');
+        
+        // Set up authentication state listener
+        onAuthStateChanged(auth, async (user) => {
+            console.log('Auth state changed in resources section:', user ? 'User logged in' : 'No user');
+            
+            if (user) {
+                // Check user role and show/hide admin upload section
+                try {
+                    const userRole = await getUserRole(user.uid, user.email);
+                    const normalizedRole = userRole.toLowerCase().trim();
+                    const isAdmin = normalizedRole === 'admin' || normalizedRole === 'super_admin';
+                    
+                    console.log('User role for resources:', userRole, 'Is Admin:', isAdmin);
+                    
+                    const adminUploadSection = document.getElementById('admin-upload-section');
+                    if (adminUploadSection) {
+                        if (isAdmin) {
+                            adminUploadSection.classList.remove('hidden');
+                            console.log('✓ Admin upload section shown');
+                        } else {
+                            adminUploadSection.classList.add('hidden');
+                            console.log('✓ Admin upload section hidden (user not admin)');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking user role for resources:', error);
+                }
+            } else {
+                // Hide admin upload section for non-authenticated users
+                const adminUploadSection = document.getElementById('admin-upload-section');
+                if (adminUploadSection) {
+                    adminUploadSection.classList.add('hidden');
+                    console.log('✓ Admin upload section hidden (no user)');
+                }
+            }
+        });
+        
+        // Set up upload form functionality
+        setupResourceUploadForm();
+        
+        // Set up tab switching functionality
+        setupResourceTabs();
+        
+        // Set up search and sort functionality
+        setupResourceSearchAndSort();
+        
+        // Load initial resources for the default tab (books)
+        loadResourcesForCategory('books');
+        
+        console.log('=== RESOURCES SECTION INITIALIZATION COMPLETE ===');
+        
+    } catch (error) {
+        console.error('Error initializing resources section:', error);
+    }
+}
+
+// Set up resource upload form functionality
+function setupResourceUploadForm() {
+    const toggleUploadBtn = document.getElementById('toggle-upload-form');
+    const uploadFormContainer = document.getElementById('upload-form-container');
+    const uploadForm = document.getElementById('resource-upload-form');
+    const fileInput = document.getElementById('resource-file');
+    const fileDropZone = document.getElementById('file-drop-zone');
+    const filePreview = document.getElementById('file-preview');
+    const fileName = document.getElementById('file-name');
+    const removeFileBtn = document.getElementById('remove-file');
+    const cancelUploadBtn = document.getElementById('cancel-upload');
+    
+    let selectedFile = null;
+    
+    // Toggle upload form visibility
+    if (toggleUploadBtn && uploadFormContainer) {
+        toggleUploadBtn.addEventListener('click', () => {
+            const isHidden = uploadFormContainer.classList.contains('hidden');
+            if (isHidden) {
+                uploadFormContainer.classList.remove('hidden');
+                toggleUploadBtn.innerHTML = '<i class="ri-close-line mr-2"></i>Cancel';
+            } else {
+                uploadFormContainer.classList.add('hidden');
+                toggleUploadBtn.innerHTML = '<i class="ri-upload-line mr-2"></i>Upload Material';
+                resetUploadForm();
+            }
+        });
+    }
+    
+    // File input handling
+    if (fileInput) {
+        fileInput.addEventListener('change', handleFileSelection);
+    }
+    
+    // Drag and drop functionality
+    if (fileDropZone) {
+        fileDropZone.addEventListener('click', () => fileInput?.click());
+        
+        fileDropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileDropZone.classList.add('border-primary', 'bg-primary', 'bg-opacity-5');
+        });
+        
+        fileDropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileDropZone.classList.remove('border-primary', 'bg-primary', 'bg-opacity-5');
+        });
+        
+        fileDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileDropZone.classList.remove('border-primary', 'bg-primary', 'bg-opacity-5');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelection({ target: { files } });
+            }
+        });
+    }
+    
+    // Remove file functionality
+    if (removeFileBtn) {
+        removeFileBtn.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            fileDropZone.classList.remove('hidden');
+            filePreview.classList.add('hidden');
+        });
+    }
+    
+    // Cancel upload functionality
+    if (cancelUploadBtn) {
+        cancelUploadBtn.addEventListener('click', () => {
+            uploadFormContainer.classList.add('hidden');
+            toggleUploadBtn.innerHTML = '<i class="ri-upload-line mr-2"></i>Upload Material';
+            resetUploadForm();
+        });
+    }
+    
+    // Form submission
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', handleResourceUpload);
+    }
+    
+    function handleFileSelection(event) {
+        const files = event.target.files;
+        if (files.length > 0) {
+            const file = files[0];
+            
+            // Validate file size (50MB limit)
+            if (file.size > 50 * 1024 * 1024) {
+                showResourceMessage('File size exceeds 50MB limit', 'error');
+                return;
+            }
+            
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileDropZone.classList.add('hidden');
+            filePreview.classList.remove('hidden');
+        }
+    }
+    
+    async function handleResourceUpload(event) {
+        event.preventDefault();
+        
+        const submitBtn = document.getElementById('submit-upload');
+        const originalBtnText = submitBtn.innerHTML;
+        
+        try {
+            // Check authentication
+            const { auth } = await import('./firebase-config.js');
+            const user = auth.currentUser;
+            
+            if (!user) {
+                showResourceMessage('Please log in to upload resources', 'error');
+                return;
+            }
+            
+            // Get form data
+            const title = document.getElementById('resource-title').value.trim();
+            const category = document.getElementById('resource-category').value;
+            const description = document.getElementById('resource-description').value.trim();
+            
+            // Validate form data
+            if (!title) {
+                showResourceMessage('Please enter a title', 'error');
+                return;
+            }
+            
+            if (!category) {
+                showResourceMessage('Please select a category', 'error');
+                return;
+            }
+            
+            if (!selectedFile) {
+                showResourceMessage('Please select a file to upload', 'error');
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="ri-loader-4-line animate-spin mr-2"></i>Uploading...';
+            
+            // Upload resource
+            const { uploadResource } = await import('./firebase-data.js');
+            const result = await uploadResource(selectedFile, category, title, description, user.uid);
+            
+            console.log('Resource uploaded successfully:', result);
+            showResourceMessage('Resource uploaded successfully!', 'success');
+            
+            // Reset form and hide upload section
+            resetUploadForm();
+            uploadFormContainer.classList.add('hidden');
+            toggleUploadBtn.innerHTML = '<i class="ri-upload-line mr-2"></i>Upload Material';
+            
+            // Refresh the current category view
+            const activeTab = document.querySelector('[id$="-tab"].bg-primary');
+            if (activeTab) {
+                const categoryName = activeTab.id.replace('-tab', '');
+                loadResourcesForCategory(categoryName);
+            }
+            
+        } catch (error) {
+            console.error('Error uploading resource:', error);
+            showResourceMessage(`Upload failed: ${error.message}`, 'error');
+        } finally {
+            // Restore button state
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+        }
+    }
+    
+    function resetUploadForm() {
+        if (uploadForm) {
+            uploadForm.reset();
+        }
+        selectedFile = null;
+        if (fileInput) {
+            fileInput.value = '';
+        }
+        if (fileDropZone) {
+            fileDropZone.classList.remove('hidden');
+        }
+        if (filePreview) {
+            filePreview.classList.add('hidden');
+        }
+    }
+}
+
+// Set up resource tab switching
+function setupResourceTabs() {
+    const tabs = ['books', 'presentations', 'videos', 'templates'];
+    
+    tabs.forEach(tabName => {
+        const tabButton = document.getElementById(`${tabName}-tab`);
+        if (tabButton) {
+            tabButton.addEventListener('click', () => {
+                // Update active tab styling
+                tabs.forEach(t => {
+                    const btn = document.getElementById(`${t}-tab`);
+                    const content = document.getElementById(`${t}-content`);
+                    
+                    if (btn && content) {
+                        if (t === tabName) {
+                            btn.classList.remove('text-gray-700', 'hover:bg-gray-100');
+                            btn.classList.add('bg-primary', 'text-white');
+                            content.classList.remove('hidden');
+                        } else {
+                            btn.classList.remove('bg-primary', 'text-white');
+                            btn.classList.add('text-gray-700', 'hover:bg-gray-100');
+                            content.classList.add('hidden');
+                        }
+                    }
+                });
+                
+                // Load resources for the selected category
+                loadResourcesForCategory(tabName);
+            });
+        }
+    });
+}
+
+// Set up search and sort functionality
+function setupResourceSearchAndSort() {
+    const searchInput = document.getElementById('resource-search');
+    const sortSelect = document.getElementById('resource-sort');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(() => {
+            const activeTab = getActiveResourceTab();
+            if (activeTab) {
+                loadResourcesForCategory(activeTab);
+            }
+        }, 300));
+    }
+    
+    if (sortSelect) {
+        sortSelect.addEventListener('change', () => {
+            const activeTab = getActiveResourceTab();
+            if (activeTab) {
+                loadResourcesForCategory(activeTab);
+            }
+        });
+    }
+}
+
+// Get currently active resource tab
+function getActiveResourceTab() {
+    const tabs = ['books', 'presentations', 'videos', 'templates'];
+    for (const tab of tabs) {
+        const tabButton = document.getElementById(`${tab}-tab`);
+        if (tabButton && tabButton.classList.contains('bg-primary')) {
+            return tab;
+        }
+    }
+    return 'books'; // Default to books
+}
+
+// Load resources for a specific category
+async function loadResourcesForCategory(category) {
+    try {
+        console.log(`Loading resources for category: ${category}`);
+        
+        const contentContainer = document.getElementById(`${category}-content`);
+        const loadingContainer = document.getElementById('resources-loading');
+        
+        if (!contentContainer) {
+            console.error(`Content container not found for category: ${category}`);
+            return;
+        }
+        
+        // Show loading state
+        if (loadingContainer) {
+            loadingContainer.classList.remove('hidden');
+        }
+        contentContainer.innerHTML = '';
+        
+        // Fetch resources
+        const { fetchResources } = await import('./firebase-data.js');
+        let resources = await fetchResources(category);
+        
+        console.log(`Fetched ${resources.length} resources for category: ${category}`);
+        
+        // Apply search filter
+        const searchInput = document.getElementById('resource-search');
+        if (searchInput && searchInput.value.trim()) {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            resources = resources.filter(resource => 
+                resource.title.toLowerCase().includes(searchTerm) ||
+                (resource.description && resource.description.toLowerCase().includes(searchTerm))
+            );
+            console.log(`Filtered to ${resources.length} resources after search`);
+        }
+        
+        // Apply sorting
+        const sortSelect = document.getElementById('resource-sort');
+        if (sortSelect) {
+            const sortBy = sortSelect.value;
+            switch (sortBy) {
+                case 'oldest':
+                    resources.sort((a, b) => new Date(a.uploadedAt) - new Date(b.uploadedAt));
+                    break;
+                case 'name':
+                    resources.sort((a, b) => a.title.localeCompare(b.title));
+                    break;
+                case 'downloads':
+                    resources.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+                    break;
+                case 'newest':
+                default:
+                    resources.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+                    break;
+            }
+        }
+        
+        // Hide loading state
+        if (loadingContainer) {
+            loadingContainer.classList.add('hidden');
+        }
+        
+        // Display resources
+        if (resources.length === 0) {
+            contentContainer.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="ri-folder-open-line text-gray-400 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No Resources Found</h3>
+                    <p class="text-gray-600 mb-4">No resources available in this category yet.</p>
+                </div>
+            `;
+        } else {
+            resources.forEach(resource => {
+                const resourceCard = createResourceCard(resource);
+                contentContainer.appendChild(resourceCard);
+            });
+        }
+        
+        console.log(`Displayed ${resources.length} resources for category: ${category}`);
+        
+    } catch (error) {
+        console.error(`Error loading resources for category ${category}:`, error);
+        
+        const contentContainer = document.getElementById(`${category}-content`);
+        const loadingContainer = document.getElementById('resources-loading');
+        
+        if (loadingContainer) {
+            loadingContainer.classList.add('hidden');
+        }
+        
+        if (contentContainer) {
+            contentContainer.innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                        <i class="ri-error-warning-line text-red-500 text-2xl"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Error Loading Resources</h3>
+                    <p class="text-gray-600 mb-4">Failed to load resources: ${error.message}</p>
+                    <button onclick="loadResourcesForCategory('${category}')" class="bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 transition">
+                        <i class="ri-refresh-line mr-2"></i>
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
+    }
+}
+
+// Create resource card element
+function createResourceCard(resource) {
+    const card = document.createElement('div');
+    card.className = 'bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover-lift animate-fade-in';
+    
+    // Get file icon based on file type
+    const fileIcon = getFileIcon(resource.fileExtension || resource.type);
+    
+    // Format upload date
+    const uploadDate = new Date(resource.uploadedAt).toLocaleDateString();
+    
+    card.innerHTML = `
+        <div class="p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-primary bg-opacity-10 rounded-lg flex items-center justify-center mr-3">
+                        <i class="${fileIcon} text-primary text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-900 mb-1 line-clamp-2">${resource.title}</h3>
+                        <p class="text-sm text-gray-500">${resource.fileExtension} • ${resource.formattedSize}</p>
+                    </div>
+                </div>
+            </div>
+            
+            ${resource.description ? `
+                <p class="text-sm text-gray-600 mb-4 line-clamp-3">${resource.description}</p>
+            ` : ''}
+            
+            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <span>
+                    <i class="ri-calendar-line mr-1"></i>
+                    ${uploadDate}
+                </span>
+                <span>
+                    <i class="ri-download-line mr-1"></i>
+                    ${resource.downloads || 0} downloads
+                </span>
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="downloadResource('${resource.id}', '${resource.url}', '${resource.title}')" 
+                        class="flex-1 bg-primary text-white px-4 py-2 rounded hover:bg-opacity-90 transition text-sm">
+                    <i class="ri-download-line mr-2"></i>
+                    Download
+                </button>
+                <button onclick="previewResource('${resource.url}', '${resource.title}', '${resource.type}')" 
+                        class="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition text-sm">
+                    <i class="ri-eye-line"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Get appropriate file icon based on file type
+function getFileIcon(fileType) {
+    if (!fileType) return 'ri-file-line';
+    
+    const type = fileType.toLowerCase();
+    
+    if (type.includes('pdf')) return 'ri-file-pdf-line';
+    if (type.includes('doc') || type.includes('word')) return 'ri-file-word-line';
+    if (type.includes('ppt') || type.includes('presentation')) return 'ri-slideshow-line';
+    if (type.includes('xls') || type.includes('sheet')) return 'ri-file-excel-line';
+    if (type.includes('zip') || type.includes('rar') || type.includes('archive')) return 'ri-file-zip-line';
+    if (type.includes('mp3') || type.includes('audio')) return 'ri-music-line';
+    if (type.includes('mp4') || type.includes('video')) return 'ri-video-line';
+    if (type.includes('image') || type.includes('jpg') || type.includes('png')) return 'ri-image-line';
+    
+    return 'ri-file-line';
+}
+
+// Download resource function
+window.downloadResource = async function(resourceId, url, title) {
+    try {
+        console.log('Downloading resource:', { resourceId, title });
+        
+        // Increment download count
+        const { incrementDownloadCount } = await import('./firebase-data.js');
+        await incrementDownloadCount(resourceId);
+        
+        // Create download link
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = title;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showResourceMessage('Download started successfully!', 'success');
+        
+        // Refresh the current category to update download count
+        const activeTab = getActiveResourceTab();
+        if (activeTab) {
+            setTimeout(() => loadResourcesForCategory(activeTab), 1000);
+        }
+        
+    } catch (error) {
+        console.error('Error downloading resource:', error);
+        showResourceMessage('Download failed. Please try again.', 'error');
+    }
+};
+
+// Preview resource function
+window.previewResource = function(url, title, type) {
+    // For PDFs and images, open in new tab for preview
+    if (type && (type.includes('pdf') || type.includes('image'))) {
+        window.open(url, '_blank');
+    } else {
+        // For other files, just download them
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+};
+
+// Show resource message (success/error)
+function showResourceMessage(message, type = 'info') {
+    const popup = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+    const icon = type === 'success' ? 'ri-check-line' : type === 'error' ? 'ri-error-warning-line' : 'ri-information-line';
+    
+    popup.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-[10001] animate-slide-in-right`;
+    popup.innerHTML = `
+        <div class="flex items-center">
+            <i class="${icon} mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    setTimeout(() => {
+        if (document.body.contains(popup)) {
+            document.body.removeChild(popup);
+        }
+    }, 5000);
+}
+
+// Debounce function for search
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Make loadResourcesForCategory globally available
+window.loadResourcesForCategory = loadResourcesForCategory;
+
+// Debug current user role function
+window.debugCurrentUserRole = async function() {
+    try {
+        console.log('=== MANUAL ROLE DEBUG START ===');
+        
+        const { auth } = await import('./firebase-config.js');
+        const { getUserRole, fetchUsers } = await import('./firebase-data.js');
+        
+        const user = auth.currentUser;
+        
+        if (!user) {
+            alert('No user is currently logged in. Please log in first.');
+            return;
+        }
+        
+        console.log('Current user:', user);
+        console.log('User UID:', user.uid);
+        console.log('User Email:', user.email);
+        
+        // Get all users from database
+        const allUsers = await fetchUsers();
+        console.log('All users in database:', allUsers);
+        
+        // Check if user exists by UID
+        const userByUID = allUsers[user.uid];
+        console.log('User found by UID:', userByUID);
+        
+        // Check if user exists by email
+        const userByEmail = Object.values(allUsers).find(u => 
+            u.email && u.email.toLowerCase() === user.email.toLowerCase()
+        );
+        console.log('User found by email:', userByEmail);
+        
+        // Get role using our function
+        const role = await getUserRole(user.uid, user.email);
+        console.log('Role returned by getUserRole:', role);
+        
+        // Show detailed alert
+        let message = `Debug Results for ${user.email}:\n\n`;
+        message += `Firebase Auth UID: ${user.uid}\n`;
+        message += `Email: ${user.email}\n\n`;
+        message += `User found by UID: ${userByUID ? 'YES' : 'NO'}\n`;
+        if (userByUID) {
+            message += `  - Role: ${userByUID.role || 'Not set'}\n`;
+            message += `  - Email: ${userByUID.email || 'Not set'}\n`;
+        }
+        message += `\nUser found by Email: ${userByEmail ? 'YES' : 'NO'}\n`;
+        if (userByEmail) {
+            message += `  - Role: ${userByEmail.role || 'Not set'}\n`;
+            message += `  - Email: ${userByEmail.email || 'Not set'}\n`;
+        }
+        message += `\nFinal Role Detected: "${role}"\n`;
+        message += `Is Admin: ${role === 'admin' || role === 'super admin' || role.includes('admin')}\n\n`;
+        message += `Check browser console for detailed logs.`;
+        
+        alert(message);
+        
+    } catch (error) {
+        console.error('Error in debug function:', error);
+        alert(`Debug failed: ${error.message}\n\nCheck console for details.`);
+    }
+};
+
+// Legacy functions for backward compatibility
 window.exportToExcel = function() {
-    console.log('Exporting filtered data to Excel:', filteredReports.length, 'reports');
-    alert(`Exporting ${filteredReports.length} filtered reports to Excel...`);
-    // TODO: Implement actual Excel export functionality
+    downloadAllReports();
 };
 
 window.exportToPDF = function() {
-    console.log('Exporting filtered data to PDF:', filteredReports.length, 'reports');
-    alert(`Exporting ${filteredReports.length} filtered reports to PDF...`);
-    // TODO: Implement actual PDF export functionality
+    downloadAllReports();
+};
+
+window.downloadReport = function(reportId) {
+    downloadSingleReport(reportId);
 };
 </script>
 </body>

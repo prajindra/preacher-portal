@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Test - ISKCON Malaysia</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script type="module" src="./firebase-config.js"></script>
+    <script type="module" src="./firebase-data.js"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Firebase Connection Test</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-semibold mb-4">Test Results</h2>
+            <div id="results" class="space-y-2">
+                <div>Starting tests...</div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Manual Test Upload</h2>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Category:</label>
+                <select id="category" class="border rounded px-3 py-2 mr-4">
+                    <option value="activities">Activities</option>
+                    <option value="mission">Mission</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">File:</label>
+                <input type="file" id="fileInput" accept="image/*" class="border rounded px-3 py-2">
+            </div>
+            <button id="uploadBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Test Upload
+            </button>
+            <div id="uploadResult" class="mt-4"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { auth, db, storage } from './firebase-config.js';
+        import { 
+            fetchGalleryImages, 
+            uploadGalleryImage, 
+            debugGalleryImages 
+        } from './firebase-data.js';
+        import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js';
+        import { 
+            collection, 
+            getDocs, 
+            addDoc, 
+            serverTimestamp 
+        } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+
+        const results = document.getElementById('results');
+        let currentUser = null;
+
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `p-2 rounded ${type === 'error' ? 'bg-red-100 text-red-700' : 
+                                         type === 'success' ? 'bg-green-100 text-green-700' : 
+                                         'bg-blue-100 text-blue-700'}`;
+            div.textContent = message;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        // Test authentication
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                log(`✓ Authentication successful: ${user.email}`, 'success');
+                runTests();
+            } else {
+                log('⚠ Not authenticated - some tests will be limited', 'error');
+                runTests();
+            }
+        });
+
+        async function runTests() {
+            try {
+                // Test 1: Basic Firestore connection
+                log('Testing Firestore connection...');
+                const testCollection = collection(db, 'galleryImages');
+                const snapshot = await getDocs(testCollection);
+                log(`✓ Firestore connected. Found ${snapshot.size} documents in galleryImages collection`, 'success');
+
+                // Test 2: Fetch gallery images
+                log('Testing fetchGalleryImages function...');
+                const activitiesImages = await fetchGalleryImages('activities');
+                const missionImages = await fetchGalleryImages('mission');
+                log(`✓ fetchGalleryImages: activities=${activitiesImages.length}, mission=${missionImages.length}`, 'success');
+
+                // Test 3: Debug gallery images
+                log('Testing debugGalleryImages function...');
+                const debugData = await debugGalleryImages();
+                log(`✓ debugGalleryImages: Found ${Object.keys(debugData).length} categories`, 'success');
+                
+                // Show detailed breakdown
+                for (const [category, images] of Object.entries(debugData)) {
+                    log(`  - Category '${category}': ${images.length} images`);
+                    if (images.length > 0) {
+                        images.slice(0, 2).forEach(img => {
+                            log(`    * ${img.title} (${img.filename})`);
+                        });
+                    }
+                }
+
+                // Test 4: Try to add a test document (if authenticated)
+                if (currentUser) {
+                    log('Testing Firestore write permissions...');
+                    try {
+                        const testDoc = {
+                            title: 'Test Document',
+                            category: 'activities',
+                            url: 'https://example.com/test.jpg',
+                            filename: 'test.jpg',
+                            uploadedBy: currentUser.uid,
+                            createdAt: serverTimestamp(),
+                            uploadedAt: new Date().toISOString(),
+                            date: new Date().toISOString().split('T')[0]
+                        };
+                        
+                        const docRef = await addDoc(collection(db, 'galleryImages'), testDoc);
+                        log(`✓ Firestore write test successful. Document ID: ${docRef.id}`, 'success');
+                        
+                        // Clean up - delete the test document
+                        // Note: We'll leave it for now to see if it appears in the gallery
+                        
+                    } catch (writeError) {
+                        log(`✗ Firestore write test failed: ${writeError.message}`, 'error');
+                    }
+                } else {
+                    log('⚠ Skipping write test - not authenticated');
+                }
+
+            } catch (error) {
+                log(`✗ Test failed: ${error.message}`, 'error');
+                console.error('Detailed error:', error);
+            }
+        }
+
+        // Manual upload test
+        document.getElementById('uploadBtn').addEventListener('click', async () => {
+            if (!currentUser) {
+                alert('Please login first');
+                return;
+            }
+
+            const fileInput = document.getElementById('fileInput');
+            const category = document.getElementById('category').value;
+            const uploadResult = document.getElementById('uploadResult');
+
+            if (!fileInput.files[0]) {
+                alert('Please select a file');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            uploadResult.innerHTML = '<div class="text-blue-600">Uploading...</div>';
+
+            try {
+                const result = await uploadGalleryImage(file, category, `Manual Test - ${file.name}`, currentUser.uid);
+                uploadResult.innerHTML = `
+                    <div class="text-green-600">
+                        <strong>Upload Successful!</strong><br>
+                        ID: ${result.id}<br>
+                        Category: ${result.category}<br>
+                        URL: <a href="${result.url}" target="_blank" class="underline">View Image</a>
+                    </div>
+                `;
+                log(`Manual upload successful: ${result.id}`, 'success');
+            } catch (error) {
+                uploadResult.innerHTML = `<div class="text-red-600">Upload failed: ${error.message}</div>`;
+                log(`Manual upload failed: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
