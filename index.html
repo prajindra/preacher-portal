@@ -609,6 +609,38 @@ Explore Reports
 <p class="text-4xl font-bold text-primary stat-counter" data-target="1247">0</p>
 </div>
 </div>
+<!-- Damodara Month Special Section -->
+<div class="mt-16">
+<h3 class="text-2xl font-bold text-center mb-8 text-primary">
+<i class="ri-flashlight-line mr-2"></i>Damodara Month Special
+</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Ghee Lamps Offered -->
+<div class="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded shadow-md hover:shadow-lg transition text-center hover-lift animate-slide-in-up animate-delay-100">
+<div class="w-16 h-16 mx-auto mb-4 bg-yellow-500 bg-opacity-20 rounded-full flex items-center justify-center animate-float">
+<i class="ri-fire-fill ri-xl text-yellow-600"></i>
+</div>
+<h3 class="text-xl font-semibold mb-2 text-gray-800">Ghee Lamps Offered</h3>
+<p class="text-4xl font-bold text-yellow-600 stat-counter" id="damodara-lamps-counter" data-target="0">0</p>
+</div>
+<!-- Books Distributed (Damodara) -->
+<div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded shadow-md hover:shadow-lg transition text-center hover-lift animate-slide-in-up animate-delay-200">
+<div class="w-16 h-16 mx-auto mb-4 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center animate-float">
+<i class="ri-book-open-line ri-xl text-blue-600"></i>
+</div>
+<h3 class="text-xl font-semibold mb-2 text-gray-800">Books Distributed</h3>
+<p class="text-4xl font-bold text-blue-600 stat-counter" id="damodara-books-counter" data-target="0">0</p>
+</div>
+<!-- Prasadam Served (Damodara) -->
+<div class="bg-gradient-to-br from-green-50 to-teal-50 p-6 rounded shadow-md hover:shadow-lg transition text-center hover-lift animate-slide-in-up animate-delay-300">
+<div class="w-16 h-16 mx-auto mb-4 bg-green-500 bg-opacity-20 rounded-full flex items-center justify-center animate-float">
+<i class="ri-restaurant-line ri-xl text-green-600"></i>
+</div>
+<h3 class="text-xl font-semibold mb-2 text-gray-800">Prasadam Served</h3>
+<p class="text-4xl font-bold text-green-600 stat-counter" id="damodara-prasadam-counter" data-target="0">0</p>
+</div>
+</div>
+</div>
 <!-- Charts Section -->
 <div class="mt-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
 <div class="bg-white p-6 rounded shadow-md">
@@ -1804,9 +1836,116 @@ async function loadPreachingImpact() {
         // Update hero section statistics with new values
         updateHeroStatistics(impact);
         
+        // Load Damodara-specific statistics
+        await loadDamodaraImpact();
+        
         console.log('Preaching impact loaded:', impact);
     } catch (error) {
         console.error('Error loading preaching impact:', error);
+    }
+}
+
+// Load Damodara Month Statistics
+async function loadDamodaraImpact() {
+    try {
+        console.log('Loading Damodara impact statistics...');
+        
+        // Import necessary functions
+        const { fetchActivityReports, fetchPreachingCategories } = await import('./firebase-data.js');
+        
+        // Fetch all reports and categories
+        const [reports, categories] = await Promise.all([
+            fetchActivityReports(),
+            fetchPreachingCategories()
+        ]);
+        
+        // Calculate Damodara-specific totals
+        let damodaraLamps = 0;
+        let damodaraBooks = 0;
+        let damodaraPrasadam = 0;
+        
+        reports.forEach(report => {
+            const category = categories[report.categoryId] || {};
+            const categoryName = category.categoryName || category.name || report.categoryName || '';
+            
+            // Check if this is a Damodara report
+            if (categoryName.toLowerCase() === 'damodara') {
+                // Count lamps (check both possible field names)
+                if (report.lampsOffered) {
+                    damodaraLamps += report.lampsOffered;
+                } else if (report.lamps) {
+                    damodaraLamps += report.lamps;
+                }
+                
+                // Count books
+                if (report.booksDistributed) {
+                    if (typeof report.booksDistributed === 'object') {
+                        damodaraBooks += (report.booksDistributed.big || 0) + 
+                                        (report.booksDistributed.medium || 0) + 
+                                        (report.booksDistributed.small || 0);
+                    } else {
+                        damodaraBooks += report.booksDistributed;
+                    }
+                }
+                
+                // Count prasadam
+                if (report.prasadamServed) {
+                    damodaraPrasadam += report.prasadamServed;
+                } else if (report.contacts && Array.isArray(report.contacts)) {
+                    damodaraPrasadam += Math.floor(report.contacts.length * 1.5);
+                }
+            }
+        });
+        
+        // Update Damodara counters
+        const lampsCounter = document.getElementById('damodara-lamps-counter');
+        const booksCounter = document.getElementById('damodara-books-counter');
+        const prasadamCounter = document.getElementById('damodara-prasadam-counter');
+        
+        if (lampsCounter) {
+            lampsCounter.classList.remove('loading-shimmer');
+            lampsCounter.setAttribute('data-target', damodaraLamps);
+            animateCounter(lampsCounter, damodaraLamps);
+        }
+        
+        if (booksCounter) {
+            booksCounter.classList.remove('loading-shimmer');
+            booksCounter.setAttribute('data-target', damodaraBooks);
+            animateCounter(booksCounter, damodaraBooks);
+        }
+        
+        if (prasadamCounter) {
+            prasadamCounter.classList.remove('loading-shimmer');
+            prasadamCounter.setAttribute('data-target', damodaraPrasadam);
+            animateCounter(prasadamCounter, damodaraPrasadam);
+        }
+        
+        console.log('Damodara impact loaded:', {
+            lamps: damodaraLamps,
+            books: damodaraBooks,
+            prasadam: damodaraPrasadam
+        });
+        
+    } catch (error) {
+        console.error('Error loading Damodara impact:', error);
+        
+        // Set to 0 on error
+        const lampsCounter = document.getElementById('damodara-lamps-counter');
+        const booksCounter = document.getElementById('damodara-books-counter');
+        const prasadamCounter = document.getElementById('damodara-prasadam-counter');
+        
+        if (lampsCounter) {
+            lampsCounter.textContent = '0';
+            lampsCounter.classList.remove('loading-shimmer');
+        }
+        if (booksCounter) {
+            booksCounter.textContent = '0';
+            booksCounter.classList.remove('loading-shimmer');
+        }
+        if (prasadamCounter) {
+            prasadamCounter.textContent = '0';
+            prasadamCounter.classList.remove('loading-shimmer');
+        }
     }
 }
 
