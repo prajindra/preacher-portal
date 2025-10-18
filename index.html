@@ -734,6 +734,7 @@ Explore Reports
 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Books</th>
 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Prasadam</th>
+<th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Lamps Offered</th>
 <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">New Contacts</th>
 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
 </tr>
@@ -753,6 +754,7 @@ Explore Reports
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Book Distribution</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">48</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">120</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">-</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">15</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
 <button onclick="viewReport('sample-1')" class="text-primary hover:text-primary-dark mr-3" title="View Report">
@@ -777,6 +779,7 @@ Explore Reports
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Harinama Sankirtana</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">32</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">85</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">-</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">12</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
 <button onclick="viewReport('sample-2')" class="text-primary hover:text-primary-dark mr-3" title="View Report">
@@ -801,6 +804,7 @@ Explore Reports
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">University Program</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">65</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">210</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">-</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">25</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
 <button onclick="viewReport('sample-3')" class="text-primary hover:text-primary-dark mr-3" title="View Report">
@@ -825,6 +829,7 @@ Explore Reports
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Food for Life</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">24</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">350</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">-</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">8</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
 <button onclick="viewReport('sample-4')" class="text-primary hover:text-primary-dark mr-3" title="View Report">
@@ -849,6 +854,7 @@ Explore Reports
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Sunday Feast</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">42</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">175</td>
+<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">-</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">18</td>
 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
 <button onclick="viewReport('sample-5')" class="text-primary hover:text-primary-dark mr-3" title="View Report">
@@ -1998,10 +2004,13 @@ function createTableRow(report) {
     // Format books display - just show total number
     let booksDisplay = report.books.toString();
     
-    // Format prasadam display with lamps if applicable
+    // Format prasadam display
     let prasadamDisplay = report.prasadam.toString();
-    if (report.lamps && (report.activity === 'Temple Program' || report.activity === 'Damodara')) {
-        prasadamDisplay += ` + ${report.lamps} lamps`;
+    
+    // Format lamps display - show lamps count or dash
+    let lampsDisplay = '-';
+    if (report.lamps && report.lamps > 0) {
+        lampsDisplay = report.lamps.toString();
     }
     
     row.innerHTML = `
@@ -2018,6 +2027,7 @@ function createTableRow(report) {
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${report.activity}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center" title="${booksDisplay}">${booksDisplay}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center" title="${prasadamDisplay}">${prasadamDisplay}</td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center" title="${lampsDisplay}">${lampsDisplay}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${report.contacts || 0}</td>
         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
             <button class="text-primary hover:text-primary-dark mr-3" onclick="viewReport('${report.id}')">
@@ -2274,13 +2284,23 @@ async function initializeDashboardFilters() {
             // Calculate total books and breakdown
             let totalBooks = 0;
             let bookBreakdown = null;
+            let bookScore = 0;
             if (report.booksDistributed) {
                 if (typeof report.booksDistributed === 'object') {
+                    const magazines = report.booksDistributed.magazines || 0;
                     const small = report.booksDistributed.small || 0;
                     const medium = report.booksDistributed.medium || 0;
-                    const large = report.booksDistributed.big || report.booksDistributed.large || 0;
-                    totalBooks = small + medium + large;
-                    bookBreakdown = { small, medium, large };
+                    const big = report.booksDistributed.big || 0;
+                    const mahaBig = report.booksDistributed.mahaBig || 0;
+                    const sbSet = report.booksDistributed.sbSet || 0;
+                    const ccSet = report.booksDistributed.ccSet || 0;
+                    
+                    totalBooks = magazines + small + medium + big + mahaBig + sbSet + ccSet;
+                    bookBreakdown = { magazines, small, medium, big, mahaBig, sbSet, ccSet };
+                    
+                    // Calculate book score
+                    bookScore = (magazines * 0.1) + (small * 0.25) + (medium * 0.5) + 
+                                (big * 1.0) + (mahaBig * 2.0) + (sbSet * 72) + (ccSet * 36);
                 } else {
                     totalBooks = report.booksDistributed;
                 }
@@ -2306,8 +2326,13 @@ async function initializeDashboardFilters() {
             
             // Get lamps count for Temple Program and Damodara categories
             let lampsCount = 0;
-            if ((activityName === 'Temple Program' || activityName === 'Damodara') && report.lamps) {
-                lampsCount = report.lamps;
+            if (activityName === 'Temple Program' || activityName === 'Damodara') {
+                // Check both possible field names for lamps
+                if (report.lampsOffered) {
+                    lampsCount = report.lampsOffered;
+                } else if (report.lamps) {
+                    lampsCount = report.lamps;
+                }
             }
             
             return {
@@ -2319,6 +2344,7 @@ async function initializeDashboardFilters() {
                 categoryId: report.categoryId,
                 books: totalBooks,
                 bookBreakdown: bookBreakdown,
+                bookScore: bookScore,
                 prasadam: prasadamCount,
                 lamps: lampsCount,
                 contacts: report.contacts ? report.contacts.length : 0,
@@ -2809,9 +2835,14 @@ async function exportReportsToExcel(reports, filename = 'preaching_reports.xlsx'
                 'Temple': report.temple,
                 'Activity': report.activity,
                 'Total Books': report.books,
-                'Small Books': report.bookBreakdown ? (report.bookBreakdown.small || 0) : '',
-                'Medium Books': report.bookBreakdown ? (report.bookBreakdown.medium || 0) : '',
-                'Large Books': report.bookBreakdown ? (report.bookBreakdown.large || 0) : '',
+                'Magazines (10-50 pages)': report.bookBreakdown ? (report.bookBreakdown.magazines || 0) : '',
+                'Small Books (50-150 pages)': report.bookBreakdown ? (report.bookBreakdown.small || 0) : '',
+                'Medium Books (150-300 pages)': report.bookBreakdown ? (report.bookBreakdown.medium || 0) : '',
+                'Big Books (300-500 pages)': report.bookBreakdown ? (report.bookBreakdown.big || 0) : '',
+                'Maha Big Books (500+ pages)': report.bookBreakdown ? (report.bookBreakdown.mahaBig || 0) : '',
+                'SB Set (18 maha big books)': report.bookBreakdown ? (report.bookBreakdown.sbSet || 0) : '',
+                'CC Set (9 maha big books)': report.bookBreakdown ? (report.bookBreakdown.ccSet || 0) : '',
+                'Book Score': report.bookScore ? report.bookScore.toFixed(2) : '',
                 'Prasadam Served': report.prasadam,
                 'Contacts Count': report.contacts || 0
             };
@@ -2835,9 +2866,14 @@ async function exportReportsToExcel(reports, filename = 'preaching_reports.xlsx'
             { wch: 15 }, // Temple
             { wch: 20 }, // Activity
             { wch: 12 }, // Total Books
-            { wch: 12 }, // Small Books
-            { wch: 12 }, // Medium Books
-            { wch: 12 }, // Large Books
+            { wch: 15 }, // Magazines
+            { wch: 15 }, // Small Books
+            { wch: 15 }, // Medium Books
+            { wch: 15 }, // Big Books
+            { wch: 18 }, // Maha Big Books
+            { wch: 15 }, // SB Set
+            { wch: 15 }, // CC Set
+            { wch: 12 }, // Book Score
             { wch: 15 }, // Prasadam
             { wch: 15 }  // Contacts Count
         ];
@@ -2921,22 +2957,18 @@ async function exportReportsToPDF(reports, filename = 'preaching_reports.pdf') {
         // Check if any reports have lamps data
         const hasLamps = reports.some(report => report.lamps && (report.activity === 'Temple Program' || report.activity === 'Damodara'));
 
-        // Prepare table headers and data with enhanced book breakdown
-        let tableHeaders = ['Date', 'Preacher', 'Temple', 'Activity', 'Total Books', 'S', 'M', 'L', 'Prasadam'];
+        // Prepare first table: General Information
+        let table1Headers = ['Date', 'Preacher', 'Temple', 'Activity', 'Prasadam'];
         if (hasLamps) {
-            tableHeaders.push('Lamps');
+            table1Headers.push('Lamps');
         }
 
-        const tableData = reports.map(report => {
+        const table1Data = reports.map(report => {
             const row = [
                 report.date,
                 report.preacher,
                 report.temple,
                 report.activity,
-                report.books.toString(),
-                report.bookBreakdown ? (report.bookBreakdown.small || 0).toString() : '0',
-                report.bookBreakdown ? (report.bookBreakdown.medium || 0).toString() : '0',
-                report.bookBreakdown ? (report.bookBreakdown.large || 0).toString() : '0',
                 report.prasadam.toString()
             ];
             
@@ -2947,40 +2979,36 @@ async function exportReportsToPDF(reports, filename = 'preaching_reports.pdf') {
             return row;
         });
 
-        // Define column styles based on whether lamps column is present
-        const columnStyles = {
-            0: { cellWidth: 20 }, // Date
-            1: { cellWidth: 25 }, // Preacher
-            2: { cellWidth: 20 }, // Temple
-            3: { cellWidth: 25 }, // Activity
-            4: { cellWidth: 15 }, // Total Books
-            5: { cellWidth: 8 },  // Small
-            6: { cellWidth: 8 },  // Medium
-            7: { cellWidth: 8 },  // Large
-            8: { cellWidth: 20 }  // Prasadam
+        // Define column styles for first table
+        const table1ColumnStyles = {
+            0: { cellWidth: 22 }, // Date
+            1: { cellWidth: 35 }, // Preacher
+            2: { cellWidth: 35 }, // Temple
+            3: { cellWidth: 40 }, // Activity
+            4: { cellWidth: 25 }  // Prasadam
         };
 
         if (hasLamps) {
-            columnStyles[9] = { cellWidth: 12 }; // Lamps
+            table1ColumnStyles[5] = { cellWidth: 23 }; // Lamps
         }
 
-        // Add table with enhanced formatting
+        // Add first table with general information
         doc.autoTable({
-            head: [tableHeaders],
-            body: tableData,
+            head: [table1Headers],
+            body: table1Data,
             startY: 50,
             theme: 'grid',
             headStyles: {
                 fillColor: [255, 153, 51], // Primary color
                 textColor: [255, 255, 255],
                 fontStyle: 'bold',
-                fontSize: 8
+                fontSize: 9
             },
             bodyStyles: {
-                fontSize: 7,
-                cellPadding: 2
+                fontSize: 8,
+                cellPadding: 3
             },
-            columnStyles: columnStyles,
+            columnStyles: table1ColumnStyles,
             margin: { top: 50, left: 10, right: 10 },
             didDrawPage: function(data) {
                 // Add page numbers with ISKCON branding
@@ -2997,7 +3025,79 @@ async function exportReportsToPDF(reports, filename = 'preaching_reports.pdf') {
             }
         });
 
-        // Add comprehensive summary section
+        // Get Y position after first table
+        let currentY = doc.lastAutoTable.finalY + 10;
+
+        // Add section header for book distribution
+        doc.setFontSize(11);
+        doc.setTextColor(255, 153, 51);
+        doc.text('Book Distribution Details:', 10, currentY);
+        currentY += 10;
+
+        // Prepare second table: Book Distribution
+        const table2Headers = ['Date', 'Total Books', 'Mag', 'Small', 'Med', 'Big', 'MBig', 'SB', 'CC', 'Score'];
+
+        const table2Data = reports.map(report => [
+            report.date,
+            report.books.toString(),
+            report.bookBreakdown ? (report.bookBreakdown.magazines || 0).toString() : '0',
+            report.bookBreakdown ? (report.bookBreakdown.small || 0).toString() : '0',
+            report.bookBreakdown ? (report.bookBreakdown.medium || 0).toString() : '0',
+            report.bookBreakdown ? (report.bookBreakdown.big || 0).toString() : '0',
+            report.bookBreakdown ? (report.bookBreakdown.mahaBig || 0).toString() : '0',
+            report.bookBreakdown ? (report.bookBreakdown.sbSet || 0).toString() : '0',
+            report.bookBreakdown ? (report.bookBreakdown.ccSet || 0).toString() : '0',
+            report.bookScore ? report.bookScore.toFixed(1) : '0'
+        ]);
+
+        // Define column styles for second table
+        const table2ColumnStyles = {
+            0: { cellWidth: 22 },  // Date
+            1: { cellWidth: 20 },  // Total Books
+            2: { cellWidth: 15 },  // Magazines
+            3: { cellWidth: 15 },  // Small
+            4: { cellWidth: 15 },  // Medium
+            5: { cellWidth: 15 },  // Big
+            6: { cellWidth: 17 },  // Maha Big
+            7: { cellWidth: 15 },  // SB Set
+            8: { cellWidth: 15 },  // CC Set
+            9: { cellWidth: 16 }   // Score
+        };
+
+        // Add second table with book distribution
+        doc.autoTable({
+            head: [table2Headers],
+            body: table2Data,
+            startY: currentY,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [255, 153, 51], // Primary color
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                fontSize: 9
+            },
+            bodyStyles: {
+                fontSize: 8,
+                cellPadding: 3
+            },
+            columnStyles: table2ColumnStyles,
+            margin: { top: 10, left: 10, right: 10 },
+            didDrawPage: function(data) {
+                // Add page numbers with ISKCON branding
+                const pageCount = doc.internal.getNumberOfPages();
+                const pageSize = doc.internal.pageSize;
+                const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+                
+                doc.setFontSize(8);
+                doc.setTextColor(150);
+                doc.text(`ISKCON Malaysia - Page ${data.pageNumber} of ${pageCount}`, 
+                    data.settings.margin.left, 
+                    pageHeight - 10
+                );
+            }
+        });
+
+        // Add comprehensive summary section with 2-column layout
         const finalY = doc.lastAutoTable.finalY + 20;
         doc.setFontSize(16);
         doc.setTextColor(255, 153, 51);
@@ -3008,65 +3108,88 @@ async function exportReportsToPDF(reports, filename = 'preaching_reports.pdf') {
         
         // Calculate totals
         const totalBooks = reports.reduce((sum, report) => sum + report.books, 0);
+        const totalMagazines = reports.reduce((sum, report) => sum + (report.bookBreakdown?.magazines || 0), 0);
         const totalSmallBooks = reports.reduce((sum, report) => sum + (report.bookBreakdown?.small || 0), 0);
         const totalMediumBooks = reports.reduce((sum, report) => sum + (report.bookBreakdown?.medium || 0), 0);
-        const totalLargeBooks = reports.reduce((sum, report) => sum + (report.bookBreakdown?.large || 0), 0);
+        const totalBigBooks = reports.reduce((sum, report) => sum + (report.bookBreakdown?.big || 0), 0);
+        const totalMahaBigBooks = reports.reduce((sum, report) => sum + (report.bookBreakdown?.mahaBig || 0), 0);
+        const totalSBSets = reports.reduce((sum, report) => sum + (report.bookBreakdown?.sbSet || 0), 0);
+        const totalCCSets = reports.reduce((sum, report) => sum + (report.bookBreakdown?.ccSet || 0), 0);
+        const totalBookScore = reports.reduce((sum, report) => sum + (report.bookScore || 0), 0);
         const totalPrasadam = reports.reduce((sum, report) => sum + report.prasadam, 0);
         const totalContacts = reports.reduce((sum, report) => sum + (report.contacts || 0), 0);
         const totalLamps = reports.reduce((sum, report) => sum + (report.lamps || 0), 0);
 
-        let summaryY = finalY + 15;
+        // Define column positions for 2-column layout
+        const leftColX = 20;
+        const rightColX = 110;
+        let leftColY = finalY + 15;
+        let rightColY = finalY + 15;
         
-        // Books summary
+        // LEFT COLUMN - Book Distribution
         doc.setFontSize(12);
         doc.setTextColor(255, 153, 51);
-        doc.text('Book Distribution:', 20, summaryY);
+        doc.text('Book Distribution:', leftColX, leftColY);
         
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
-        summaryY += 10;
-        doc.text(`Total Books Distributed: ${totalBooks.toLocaleString()}`, 25, summaryY);
-        summaryY += 8;
-        doc.text(`• Small Books: ${totalSmallBooks.toLocaleString()}`, 30, summaryY);
-        summaryY += 8;
-        doc.text(`• Medium Books: ${totalMediumBooks.toLocaleString()}`, 30, summaryY);
-        summaryY += 8;
-        doc.text(`• Large Books: ${totalLargeBooks.toLocaleString()}`, 30, summaryY);
+        leftColY += 10;
+        doc.text(`Total Books: ${totalBooks.toLocaleString()}`, leftColX + 5, leftColY);
+        leftColY += 7;
+        doc.text(`• Magazines: ${totalMagazines.toLocaleString()}`, leftColX + 10, leftColY);
+        leftColY += 6;
+        doc.text(`• Small Books: ${totalSmallBooks.toLocaleString()}`, leftColX + 10, leftColY);
+        leftColY += 6;
+        doc.text(`• Medium Books: ${totalMediumBooks.toLocaleString()}`, leftColX + 10, leftColY);
+        leftColY += 6;
+        doc.text(`• Big Books: ${totalBigBooks.toLocaleString()}`, leftColX + 10, leftColY);
+        leftColY += 6;
+        doc.text(`• Maha Big Books: ${totalMahaBigBooks.toLocaleString()}`, leftColX + 10, leftColY);
+        leftColY += 6;
+        doc.text(`• SB Sets: ${totalSBSets.toLocaleString()}`, leftColX + 10, leftColY);
+        leftColY += 6;
+        doc.text(`• CC Sets: ${totalCCSets.toLocaleString()}`, leftColX + 10, leftColY);
+        leftColY += 8;
+        doc.setFontSize(11);
+        doc.setTextColor(255, 153, 51);
+        doc.text(`Book Score: ${totalBookScore.toFixed(2)} pts`, leftColX + 5, leftColY);
 
-        // Prasadam summary
-        summaryY += 15;
+        // RIGHT COLUMN - Prasadam Distribution
         doc.setFontSize(12);
         doc.setTextColor(255, 153, 51);
-        doc.text('Prasadam Distribution:', 20, summaryY);
+        doc.text('Prasadam Distribution:', rightColX, rightColY);
         
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
-        summaryY += 10;
-        doc.text(`Total Prasadam Served: ${totalPrasadam.toLocaleString()}`, 25, summaryY);
+        rightColY += 10;
+        doc.text(`Total Served: ${totalPrasadam.toLocaleString()}`, rightColX + 5, rightColY);
 
-        // Lamps summary (if applicable)
+        // Lamps summary (if applicable) - RIGHT COLUMN
         if (totalLamps > 0) {
-            summaryY += 15;
+            rightColY += 15;
             doc.setFontSize(12);
             doc.setTextColor(255, 153, 51);
-            doc.text('Temple Programs & Damodara:', 20, summaryY);
+            doc.text('Temple Programs:', rightColX, rightColY);
             
             doc.setFontSize(10);
             doc.setTextColor(0, 0, 0);
-            summaryY += 10;
-            doc.text(`Total Lamps Offered: ${totalLamps.toLocaleString()}`, 25, summaryY);
+            rightColY += 10;
+            doc.text(`Lamps Offered: ${totalLamps.toLocaleString()}`, rightColX + 5, rightColY);
         }
 
-        // Contacts summary
-        summaryY += 15;
+        // Contacts summary - RIGHT COLUMN
+        rightColY += 15;
         doc.setFontSize(12);
         doc.setTextColor(255, 153, 51);
-        doc.text('Outreach Impact:', 20, summaryY);
+        doc.text('Outreach Impact:', rightColX, rightColY);
         
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
-        summaryY += 10;
-        doc.text(`Total Contacts Made: ${totalContacts.toLocaleString()}`, 25, summaryY);
+        rightColY += 10;
+        doc.text(`Contacts Made: ${totalContacts.toLocaleString()}`, rightColX + 5, rightColY);
+
+        // Update summaryY to the maximum of both columns
+        let summaryY = Math.max(leftColY, rightColY);
 
         // Add detailed contacts section with names and phone numbers
         const allContacts = reports.reduce((contacts, report) => {
@@ -3282,26 +3405,62 @@ window.viewReport = async function(reportId) {
 
         // Prepare book breakdown display for modal
         let bookBreakdownHtml = '';
-        if (report.bookBreakdown && (report.bookBreakdown.small || report.bookBreakdown.medium || report.bookBreakdown.large)) {
-            bookBreakdownHtml = `
-                <div class="md:col-span-2 mt-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Book Distribution Breakdown</label>
-                    <div class="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded">
-                        <div class="text-center">
-                            <p class="text-lg font-bold text-primary">${report.bookBreakdown.small || 0}</p>
-                            <p class="text-sm text-gray-600">Small Books</p>
+        if (report.bookBreakdown) {
+            const hasData = report.bookBreakdown.magazines || report.bookBreakdown.small || 
+                          report.bookBreakdown.medium || report.bookBreakdown.big || 
+                          report.bookBreakdown.mahaBig || report.bookBreakdown.sbSet || 
+                          report.bookBreakdown.ccSet;
+            
+            if (hasData) {
+                bookBreakdownHtml = `
+                    <div class="md:col-span-2 mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Book Distribution Breakdown</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 bg-gray-50 p-4 rounded">
+                            <div class="text-center p-2">
+                                <p class="text-lg font-bold text-primary">${report.bookBreakdown.magazines || 0}</p>
+                                <p class="text-xs text-gray-600">Magazines</p>
+                                <p class="text-xs text-gray-500">(10-50 pages)</p>
+                            </div>
+                            <div class="text-center p-2">
+                                <p class="text-lg font-bold text-primary">${report.bookBreakdown.small || 0}</p>
+                                <p class="text-xs text-gray-600">Small Books</p>
+                                <p class="text-xs text-gray-500">(50-150 pages)</p>
+                            </div>
+                            <div class="text-center p-2">
+                                <p class="text-lg font-bold text-primary">${report.bookBreakdown.medium || 0}</p>
+                                <p class="text-xs text-gray-600">Medium Books</p>
+                                <p class="text-xs text-gray-500">(150-300 pages)</p>
+                            </div>
+                            <div class="text-center p-2">
+                                <p class="text-lg font-bold text-primary">${report.bookBreakdown.big || 0}</p>
+                                <p class="text-xs text-gray-600">Big Books</p>
+                                <p class="text-xs text-gray-500">(300-500 pages)</p>
+                            </div>
+                            <div class="text-center p-2">
+                                <p class="text-lg font-bold text-primary">${report.bookBreakdown.mahaBig || 0}</p>
+                                <p class="text-xs text-gray-600">Maha Big Books</p>
+                                <p class="text-xs text-gray-500">(500+ pages)</p>
+                            </div>
+                            <div class="text-center p-2">
+                                <p class="text-lg font-bold text-primary">${report.bookBreakdown.sbSet || 0}</p>
+                                <p class="text-xs text-gray-600">SB Set</p>
+                                <p class="text-xs text-gray-500">(18 maha big books)</p>
+                            </div>
+                            <div class="text-center p-2">
+                                <p class="text-lg font-bold text-primary">${report.bookBreakdown.ccSet || 0}</p>
+                                <p class="text-xs text-gray-600">CC Set</p>
+                                <p class="text-xs text-gray-500">(9 maha big books)</p>
+                            </div>
                         </div>
-                        <div class="text-center">
-                            <p class="text-lg font-bold text-primary">${report.bookBreakdown.medium || 0}</p>
-                            <p class="text-sm text-gray-600">Medium Books</p>
+                        ${report.bookScore ? `
+                        <div class="mt-3 p-3 bg-primary bg-opacity-10 rounded text-center">
+                            <p class="text-sm text-gray-700">Total Book Score: <span class="font-bold text-primary text-lg">${report.bookScore.toFixed(2)} points</span></p>
+                            <p class="text-xs text-gray-500 mt-1">Based on book distribution scoring system</p>
                         </div>
-                        <div class="text-center">
-                            <p class="text-lg font-bold text-primary">${report.bookBreakdown.large || 0}</p>
-                            <p class="text-sm text-gray-600">Large Books</p>
-                        </div>
+                        ` : ''}
                     </div>
-                </div>
-            `;
+                `;
+            }
         }
 
         // Prepare lamps display for Temple Program and Damodara
